@@ -181,14 +181,21 @@ export default function HomePage() {
             <ul className="border-t border-line">
               {insights.map((insight, i) => (
                 <li key={i} className="border-b border-line px-5 py-4 lg:px-8">
-                  <div className="flex gap-3">
-                    <span aria-hidden className="mt-1.5 text-accent">
-                      +
-                    </span>
-                    <div className="space-y-2">
+                  <div className="space-y-2">
+                    {/* items-center, not items-start with a margin nudge: the
+                        "+" is Latin-font ASCII but Chinese text falls back
+                        to the OS CJK font, whose ascent/leading proportions
+                        differ enough from Inter Tight that a nudge tuned for
+                        English baselines misaligns visibly under Chinese.
+                        Paired only with the paragraph (not the source label
+                        below) so centering doesn't drift across both lines. */}
+                    <div className="flex items-center gap-3">
+                      <span aria-hidden className="text-accent">
+                        +
+                      </span>
                       <p className="text-[13px] leading-relaxed text-text">{insight.text}</p>
-                      <MonoLabel>{insight.source}</MonoLabel>
                     </div>
+                    <MonoLabel className="pl-[26px]">{insight.source}</MonoLabel>
                   </div>
                 </li>
               ))}

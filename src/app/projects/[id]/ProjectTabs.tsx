@@ -631,8 +631,12 @@ function Experience({ project, t }: { project: Project; t: Translations }) {
   return (
     <div className="border-t border-line">
       <div className="border-b border-line bg-accent-wash px-6 py-4 lg:px-8">
-        <div className="flex items-start gap-3">
-          <span aria-hidden className="mt-0.5 text-accent">
+        {/* items-center, not items-start: the "+" is Latin-font ASCII but
+            Chinese text falls back to the OS CJK font, whose ascent/leading
+            proportions differ enough from Inter Tight that a margin nudge
+            tuned for English baselines misaligns visibly under Chinese. */}
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="text-accent">
             +
           </span>
           <p className="text-[13px] leading-relaxed text-text">{te.banner}</p>
