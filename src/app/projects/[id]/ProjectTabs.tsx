@@ -11,11 +11,14 @@ import {
   toneForHealth,
   toneForSeverity,
 } from "@/components/ui/primitives";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import type { Translations } from "@/lib/i18n/translations";
 import {
   budgetVariance,
   deriveHealth,
   formatCurrency,
   formatDate,
+  formatHealthDriver,
   formatNumber,
   issueCounts,
   plannedProgress,
@@ -25,7 +28,7 @@ import {
 } from "@/lib/metrics";
 import type { Measure, Project } from "@/lib/types";
 
-const TABS = ["Overview", "Timeline", "Risks & issues", "Vendor", "Benefits", "Experience"] as const;
+const TABS = ["overview", "timeline", "risksIssues", "vendor", "benefits", "experience"] as const;
 type Tab = (typeof TABS)[number];
 
 /* ---------------------------------------------------------------- KPI cell */
@@ -81,7 +84,8 @@ function MeasureValue<T>({
 
 /* ---------------------------------------------------------------- Overview */
 
-function Overview({ project }: { project: Project }) {
+function Overview({ project, t }: { project: Project; t: Translations }) {
+  const tk = t.project.kpi;
   const progress = weightedProgress(project);
   const planned = plannedProgress(project);
   const variance = scheduleVariance(project);
@@ -93,34 +97,35 @@ function Overview({ project }: { project: Project }) {
   const topRisks = [...project.risks].sort((a, b) => riskExposure(b) - riskExposure(a)).slice(0, 3);
   const rankedIssues = [...project.issues].sort((a, b) => Number(b.overdue) - Number(a.overdue)).slice(0, 4);
 
+  const driverText = derived.drivers.map((d) => formatHealthDriver(d, t)).join(" ");
+
   return (
     <>
       {/* KPI strip */}
       <div className="grid grid-cols-1 border-t border-line [&>*]:border-b [&>*]:border-line sm:grid-cols-2 [&>*]:sm:border-r lg:grid-cols-4">
         <Kpi
-          label="Project status"
-          definition={`Health is derived from schedule, risk, issue and budget rules. Drivers: ${derived.drivers.join(" ")}`}
+          label={tk.statusLabel}
+          definition={tk.statusDefinition(driverText)}
           footer={
             <p className="text-[12px] leading-relaxed text-muted">
-              {project.healthOverrideReason ?? derived.drivers[0]}
+              {project.healthOverrideReason ?? formatHealthDriver(derived.drivers[0], t)}
             </p>
           }
         >
           <div className="space-y-2.5">
-            <BigValue>{project.stage}</BigValue>
-            <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+            <BigValue>{t.enum.stage[project.stage]}</BigValue>
+            <StatusBadge tone={toneForHealth(project.health)}>{t.enum.health[project.health]}</StatusBadge>
           </div>
         </Kpi>
 
         <Kpi
-          label="Project progress"
-          definition="Percent complete from weighted milestones. Planned progress is interpolated from the milestone baseline. A manual override is audited and shown alongside, never instead of, the weighted roll-up."
+          label={tk.progressLabel}
+          definition={tk.progressDefinition}
           footer={
             <div className="flex justify-between">
-              <MonoLabel>Planned {planned}%</MonoLabel>
+              <MonoLabel>{tk.plannedPct(planned)}</MonoLabel>
               <span className={cx("tnum text-[12px]", variance < 0 ? "text-warn" : "text-ok")}>
-                {variance > 0 ? "+" : ""}
-                {variance}% variance
+                {tk.variancePct(variance)}
               </span>
             </div>
           }
@@ -135,11 +140,14 @@ function Overview({ project }: { project: Project }) {
         </Kpi>
 
         <Kpi
-          label="Budget"
-          definition={`Approved ${formatCurrency(project.budget.approved, currency)}; forecast at completion ${formatCurrency(project.budget.forecastAtCompletion, currency)}. Variance is approved minus forecast.`}
+          label={tk.budgetLabel}
+          definition={tk.budgetDefinition(
+            formatCurrency(project.budget.approved, currency),
+            formatCurrency(project.budget.forecastAtCompletion, currency),
+          )}
           footer={
             <div className="flex justify-between">
-              <MonoLabel>Variance</MonoLabel>
+              <MonoLabel>{tk.variance}</MonoLabel>
               <span className={cx("tnum text-[12px]", budgetVar < 0 ? "text-risk" : "text-ok")}>
                 {budgetVar < 0 ? "−" : "+"}
                 {formatCurrency(Math.abs(budgetVar), currency, true)}
@@ -149,62 +157,62 @@ function Overview({ project }: { project: Project }) {
         >
           <div className="space-y-1.5">
             <BigValue>{formatCurrency(project.budget.actual, currency, true)}</BigValue>
-            <MonoLabel>
-              spent of {formatCurrency(project.budget.approved, currency, true)} {currency}
-            </MonoLabel>
+            <MonoLabel>{tk.spentOf(formatCurrency(project.budget.approved, currency, true), currency)}</MonoLabel>
           </div>
         </Kpi>
 
         <Kpi
-          label="ROI"
-          definition={`(annualized quantified benefit − annual operating cost) / total project cost × 100. Assumptions: ${project.roi.assumptions}`}
+          label={tk.roiLabel}
+          definition={tk.roiDefinition(project.roi.assumptions)}
           footer={
             <div className="flex justify-between">
-              <MonoLabel>Payback</MonoLabel>
+              <MonoLabel>{tk.payback}</MonoLabel>
               <span className="tnum text-[12px] text-muted">
                 {project.roi.paybackMonths.status === "available"
-                  ? `${project.roi.paybackMonths.value} months`
-                  : "Data unavailable"}
+                  ? tk.months(project.roi.paybackMonths.value)
+                  : t.common.dataUnavailable}
               </span>
             </div>
           }
         >
           <div className="space-y-1.5">
             <MeasureValue measure={project.roi.expectedPct} format={(v) => `${formatNumber(v)}%`} />
-            <MonoLabel>Expected</MonoLabel>
+            <MonoLabel>{tk.expected}</MonoLabel>
           </div>
         </Kpi>
 
         <Kpi
-          label="Open issues"
-          definition="Count by severity with age. Overdue means the owner action date has passed."
+          label={tk.openIssuesLabel}
+          definition={tk.openIssuesDefinition}
           footer={
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {issues.bySeverity
                 .filter((s) => s.count > 0)
                 .map((s) => (
                   <span key={s.severity} className="mono-label">
-                    {s.severity} {s.count}
+                    {t.enum.severity[s.severity]} {s.count}
                   </span>
                 ))}
-              {issues.total === 0 && <MonoLabel>No open issues</MonoLabel>}
+              {issues.total === 0 && <MonoLabel>{tk.noOpenIssues}</MonoLabel>}
             </div>
           }
         >
           <BigValue tone={issues.overdue > 0 ? "warn" : undefined}>{issues.total}</BigValue>
-          {issues.overdue > 0 && <MonoLabel className="mt-1.5 text-warn">{issues.overdue} overdue</MonoLabel>}
+          {issues.overdue > 0 && (
+            <MonoLabel className="mt-1.5 text-warn">
+              {issues.overdue} {t.project.lists.overdue}
+            </MonoLabel>
+          )}
         </Kpi>
 
         <Kpi
-          label="Risks"
-          definition="Exposure is probability × impact on a 1–5 scale. Top risks are ranked by exposure."
+          label={tk.risksLabel}
+          definition={tk.risksDefinition}
           footer={
             topRisks[0] ? (
-              <p className="text-[12px] leading-relaxed text-muted">
-                Top: {topRisks[0].title} (exposure {riskExposure(topRisks[0])})
-              </p>
+              <p className="text-[12px] leading-relaxed text-muted">{tk.topRisk(topRisks[0].title, riskExposure(topRisks[0]))}</p>
             ) : (
-              <MonoLabel>No open risks</MonoLabel>
+              <MonoLabel>{tk.noOpenRisks}</MonoLabel>
             )
           }
         >
@@ -214,12 +222,12 @@ function Overview({ project }: { project: Project }) {
         </Kpi>
 
         <Kpi
-          label="Vendor status"
-          definition="Vendor health combines contractual milestone completion with delivery, quality and responsiveness scores."
+          label={tk.vendorStatusLabel}
+          definition={tk.vendorStatusDefinition}
           footer={
             project.vendor ? (
               <div className="flex justify-between">
-                <MonoLabel>Open actions</MonoLabel>
+                <MonoLabel>{tk.openActions}</MonoLabel>
                 <span className="tnum text-[12px] text-ink">{project.vendor.openActions}</span>
               </div>
             ) : undefined
@@ -230,28 +238,26 @@ function Overview({ project }: { project: Project }) {
               <BigValue>
                 {project.vendor.milestonesComplete}/{project.vendor.milestonesTotal}
               </BigValue>
-              <StatusBadge tone={toneForHealth(project.vendor.health)}>{project.vendor.health}</StatusBadge>
+              <StatusBadge tone={toneForHealth(project.vendor.health)}>{t.enum.health[project.vendor.health]}</StatusBadge>
             </div>
           ) : (
-            <Unavailable reason="No vendor is attached to this project." />
+            <Unavailable reason={tk.noVendor} />
           )}
         </Kpi>
 
         <Kpi
-          label="AI usage"
-          definition="Jason activity scoped to this project. Prompt text is never exposed to users without permission."
+          label={tk.aiUsageLabel}
+          definition={tk.aiUsageDefinition}
           footer={
             <div className="flex justify-between">
-              <MonoLabel>Actions confirmed</MonoLabel>
+              <MonoLabel>{tk.actionsConfirmed}</MonoLabel>
               <span className="tnum text-[12px] text-ink">{project.ai.actionsConfirmed}</span>
             </div>
           }
         >
           <div className="space-y-1.5">
             <BigValue>{project.ai.prompts}</BigValue>
-            <MonoLabel>
-              prompts · {project.ai.activeUsers} users · ~{project.ai.estimatedHoursSaved}h saved
-            </MonoLabel>
+            <MonoLabel>{tk.promptsSummary(project.ai.activeUsers, project.ai.estimatedHoursSaved)}</MonoLabel>
           </div>
         </Kpi>
       </div>
@@ -260,16 +266,16 @@ function Overview({ project }: { project: Project }) {
       <div className="grid grid-cols-1 border-b border-line xl:grid-cols-2">
         <section className="border-b border-line p-6 xl:border-r xl:border-b-0 lg:p-8">
           <div className="mb-6 flex items-center gap-2">
-            <MonoLabel>Progress · planned vs actual</MonoLabel>
-            <Definition text="Actual is the weighted milestone roll-up at each period close. Future periods show planned only." />
+            <MonoLabel>{t.project.charts.progressTitle}</MonoLabel>
+            <Definition text={t.project.charts.progressDefinition} />
           </div>
           <ProgressChart data={project.progressSeries} />
         </section>
 
         <section className="p-6 lg:p-8">
           <div className="mb-6 flex items-center gap-2">
-            <MonoLabel>Budget consumption</MonoLabel>
-            <Definition text="The black rule marks the approved budget. The coloured rule marks forecast at completion — red when forecast exceeds approved." />
+            <MonoLabel>{t.project.charts.budgetTitle}</MonoLabel>
+            <Definition text={t.project.charts.budgetDefinition} />
           </div>
           <BudgetBar
             approved={project.budget.approved}
@@ -285,25 +291,23 @@ function Overview({ project }: { project: Project }) {
       <div className="grid grid-cols-1 border-b border-line xl:grid-cols-2">
         <section className="border-b border-line xl:border-r xl:border-b-0">
           <header className="border-b border-line px-6 py-4 lg:px-8">
-            <MonoLabel>Top risks by exposure</MonoLabel>
+            <MonoLabel>{t.project.lists.topRisksByExposure}</MonoLabel>
           </header>
           {topRisks.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-muted lg:px-8">No open risks on this project.</p>
+            <p className="px-6 py-8 text-sm text-muted lg:px-8">{t.project.lists.noRisksOnProject}</p>
           ) : (
             <ul>
               {topRisks.map((risk) => (
                 <li key={risk.id} className="border-b border-line px-6 py-4 last:border-b-0 lg:px-8">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1.5">
-                      <MonoLabel>
-                        {risk.id} · exposure {riskExposure(risk)} · {risk.owner}
-                      </MonoLabel>
+                      <MonoLabel>{t.project.lists.riskMeta(risk.id, riskExposure(risk), risk.owner)}</MonoLabel>
                       <p className="text-[14px] leading-snug text-ink">{risk.title}</p>
                       <p className="text-[12px] leading-relaxed text-muted">
-                        {risk.mitigation} — {risk.mitigationStatus}
+                        {risk.mitigation} — {t.enum.mitigationStatus[risk.mitigationStatus]}
                       </p>
                     </div>
-                    <StatusBadge tone={toneForSeverity(risk.severity)}>{risk.severity}</StatusBadge>
+                    <StatusBadge tone={toneForSeverity(risk.severity)}>{t.enum.severity[risk.severity]}</StatusBadge>
                   </div>
                 </li>
               ))}
@@ -313,24 +317,22 @@ function Overview({ project }: { project: Project }) {
 
         <section>
           <header className="border-b border-line px-6 py-4 lg:px-8">
-            <MonoLabel>Open issues</MonoLabel>
+            <MonoLabel>{t.project.lists.openIssuesTitle}</MonoLabel>
           </header>
           {rankedIssues.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-muted lg:px-8">No open issues on this project.</p>
+            <p className="px-6 py-8 text-sm text-muted lg:px-8">{t.project.lists.noIssuesOnProject}</p>
           ) : (
             <ul>
               {rankedIssues.map((issue) => (
                 <li key={issue.id} className="border-b border-line px-6 py-4 last:border-b-0 lg:px-8">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1.5">
-                      <MonoLabel>
-                        {issue.id} · {issue.owner} · {issue.ageDays}d old
-                      </MonoLabel>
+                      <MonoLabel>{t.project.lists.issueMeta(issue.id, issue.owner, issue.ageDays)}</MonoLabel>
                       <p className="text-[14px] leading-snug text-ink">{issue.title}</p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      <StatusBadge tone={toneForSeverity(issue.severity)}>{issue.severity}</StatusBadge>
-                      {issue.overdue && <MonoLabel className="text-warn">Overdue</MonoLabel>}
+                      <StatusBadge tone={toneForSeverity(issue.severity)}>{t.enum.severity[issue.severity]}</StatusBadge>
+                      {issue.overdue && <MonoLabel className="text-warn">{t.project.lists.overdue}</MonoLabel>}
                     </div>
                   </div>
                 </li>
@@ -345,7 +347,8 @@ function Overview({ project }: { project: Project }) {
 
 /* ---------------------------------------------------------------- Timeline */
 
-function Timeline({ project }: { project: Project }) {
+function Timeline({ project, t }: { project: Project; t: Translations }) {
+  const tt = t.project.timeline;
   return (
     <div className="border-t border-line">
       <ul>
@@ -368,16 +371,16 @@ function Timeline({ project }: { project: Project }) {
               <div className="space-y-2 pb-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] leading-snug">{m.name}</h3>
-                  <span className="mono-label">weight {m.weight}</span>
+                  <span className="mono-label">{tt.weight(m.weight)}</span>
                 </div>
                 <div className="flex flex-wrap gap-x-6 gap-y-1">
-                  <span className="mono-label">Planned {formatDate(m.plannedDate)}</span>
+                  <span className="mono-label">{tt.planned(formatDate(m.plannedDate))}</span>
                   {m.actualDate ? (
                     <span className={cx("mono-label", late ? "text-warn" : "text-ok")}>
-                      Actual {formatDate(m.actualDate)}
+                      {tt.actual(formatDate(m.actualDate))}
                     </span>
                   ) : (
-                    <span className="mono-label">Not complete</span>
+                    <span className="mono-label">{tt.notComplete}</span>
                   )}
                 </div>
               </div>
@@ -391,18 +394,19 @@ function Timeline({ project }: { project: Project }) {
 
 /* ---------------------------------------------------------- Risks & issues */
 
-function RisksIssues({ project }: { project: Project }) {
+function RisksIssues({ project, t }: { project: Project; t: Translations }) {
+  const tr = t.project.risksIssues;
   return (
     <div className="border-t border-line">
       <section>
         <header className="border-b border-line px-6 py-4 lg:px-8">
-          <MonoLabel>Risk register</MonoLabel>
+          <MonoLabel>{tr.riskRegister}</MonoLabel>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left">
             <thead>
               <tr className="border-b border-line">
-                {["ID", "Risk", "Severity", "P × I", "Owner", "Mitigation"].map((h) => (
+                {[tr.colId, tr.colRisk, tr.colSeverity, tr.colProbabilityImpact, tr.colOwner, tr.colMitigation].map((h) => (
                   <th key={h} scope="col" className="mono-label px-6 py-3 font-normal lg:px-8">
                     {h}
                   </th>
@@ -413,7 +417,7 @@ function RisksIssues({ project }: { project: Project }) {
               {project.risks.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-sm text-muted lg:px-8">
-                    No open risks.
+                    {tr.noRisks}
                   </td>
                 </tr>
               )}
@@ -422,7 +426,7 @@ function RisksIssues({ project }: { project: Project }) {
                   <td className="mono-label px-6 py-4 lg:px-8">{r.id}</td>
                   <td className="px-6 py-4 text-[14px] text-ink lg:px-8">{r.title}</td>
                   <td className="px-6 py-4 lg:px-8">
-                    <StatusBadge tone={toneForSeverity(r.severity)}>{r.severity}</StatusBadge>
+                    <StatusBadge tone={toneForSeverity(r.severity)}>{t.enum.severity[r.severity]}</StatusBadge>
                   </td>
                   <td className="tnum px-6 py-4 text-[13px] text-ink lg:px-8">
                     {r.probability} × {r.impact} = {riskExposure(r)}
@@ -430,7 +434,7 @@ function RisksIssues({ project }: { project: Project }) {
                   <td className="px-6 py-4 text-[13px] text-muted lg:px-8">{r.owner}</td>
                   <td className="px-6 py-4 text-[13px] text-muted lg:px-8">
                     {r.mitigation}
-                    <span className="mono-label mt-1 block">{r.mitigationStatus}</span>
+                    <span className="mono-label mt-1 block">{t.enum.mitigationStatus[r.mitigationStatus]}</span>
                   </td>
                 </tr>
               ))}
@@ -441,13 +445,13 @@ function RisksIssues({ project }: { project: Project }) {
 
       <section>
         <header className="border-y border-line px-6 py-4 lg:px-8">
-          <MonoLabel>Issue register</MonoLabel>
+          <MonoLabel>{tr.issueRegister}</MonoLabel>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b border-line">
-                {["ID", "Issue", "Severity", "Owner", "Age", "State"].map((h) => (
+                {[tr.colId, tr.colIssue, tr.colSeverity, tr.colOwner, tr.colAge, tr.colState].map((h) => (
                   <th key={h} scope="col" className="mono-label px-6 py-3 font-normal lg:px-8">
                     {h}
                   </th>
@@ -458,7 +462,7 @@ function RisksIssues({ project }: { project: Project }) {
               {project.issues.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-sm text-muted lg:px-8">
-                    No open issues.
+                    {tr.noIssues}
                   </td>
                 </tr>
               )}
@@ -467,12 +471,12 @@ function RisksIssues({ project }: { project: Project }) {
                   <td className="mono-label px-6 py-4 lg:px-8">{i.id}</td>
                   <td className="px-6 py-4 text-[14px] text-ink lg:px-8">{i.title}</td>
                   <td className="px-6 py-4 lg:px-8">
-                    <StatusBadge tone={toneForSeverity(i.severity)}>{i.severity}</StatusBadge>
+                    <StatusBadge tone={toneForSeverity(i.severity)}>{t.enum.severity[i.severity]}</StatusBadge>
                   </td>
                   <td className="px-6 py-4 text-[13px] text-muted lg:px-8">{i.owner}</td>
                   <td className="tnum px-6 py-4 text-[13px] text-muted lg:px-8">{i.ageDays}d</td>
                   <td className="px-6 py-4 lg:px-8">
-                    <StatusBadge tone={i.overdue ? "warn" : "ok"}>{i.overdue ? "Overdue" : "On time"}</StatusBadge>
+                    <StatusBadge tone={i.overdue ? "warn" : "ok"}>{i.overdue ? tr.overdueBadge : tr.onTimeBadge}</StatusBadge>
                   </td>
                 </tr>
               ))}
@@ -486,13 +490,14 @@ function RisksIssues({ project }: { project: Project }) {
 
 /* ------------------------------------------------------------------ Vendor */
 
-function Vendor({ project }: { project: Project }) {
+function Vendor({ project, t }: { project: Project; t: Translations }) {
+  const tv = t.project.vendor;
   const v = project.vendor;
   if (!v) {
     return (
       <div className="border-t border-line px-6 py-16 text-center lg:px-8">
-        <MonoLabel className="mb-3">No vendor</MonoLabel>
-        <p className="text-[15px] text-muted">This project has no vendor attached.</p>
+        <MonoLabel className="mb-3">{tv.noVendorLabel}</MonoLabel>
+        <p className="text-[15px] text-muted">{tv.noVendorDescription}</p>
       </div>
     );
   }
@@ -500,21 +505,21 @@ function Vendor({ project }: { project: Project }) {
   return (
     <div className="border-t border-line">
       <div className="grid grid-cols-1 border-b border-line [&>*]:border-b [&>*]:border-line sm:grid-cols-2 [&>*]:sm:border-r lg:grid-cols-4">
-        <Kpi label="Vendor" definition="Vendor of record for this project's contracted scope.">
+        <Kpi label={tv.vendorLabel} definition={tv.vendorDefinition}>
           <div className="space-y-2.5">
             <div className="text-[19px] leading-tight text-ink">{v.name}</div>
-            <StatusBadge tone={toneForHealth(v.health)}>{v.health}</StatusBadge>
+            <StatusBadge tone={toneForHealth(v.health)}>{t.enum.health[v.health]}</StatusBadge>
           </div>
         </Kpi>
-        <Kpi label="Contract milestones" definition="Contractual milestones marked complete by the project lead.">
+        <Kpi label={tv.contractMilestonesLabel} definition={tv.contractMilestonesDefinition}>
           <BigValue>
             {v.milestonesComplete}/{v.milestonesTotal}
           </BigValue>
         </Kpi>
-        <Kpi label="Open actions" definition="Vendor actions awaiting response or delivery.">
+        <Kpi label={tv.openActionsLabel} definition={tv.openActionsDefinition}>
           <BigValue tone={v.openActions > 2 ? "warn" : undefined}>{v.openActions}</BigValue>
         </Kpi>
-        <Kpi label="Last update" definition="Date of the most recent vendor status update recorded against this project.">
+        <Kpi label={tv.lastUpdateLabel} definition={tv.lastUpdateDefinition}>
           <div className="tnum text-[19px] text-ink">{formatDate(v.lastUpdate)}</div>
           <MonoLabel className="mt-2">{v.contact}</MonoLabel>
         </Kpi>
@@ -522,14 +527,14 @@ function Vendor({ project }: { project: Project }) {
 
       <section className="p-6 lg:p-8">
         <div className="mb-6 flex items-center gap-2">
-          <MonoLabel>Scorecard</MonoLabel>
-          <Definition text="Rolling 90-day scores out of 100, recorded by the project lead at each vendor review." />
+          <MonoLabel>{tv.scorecard}</MonoLabel>
+          <Definition text={tv.scorecardDefinition} />
         </div>
         <dl className="max-w-xl space-y-4">
           {[
-            { label: "Delivery", value: v.delivery },
-            { label: "Quality", value: v.quality },
-            { label: "Responsiveness", value: v.responsiveness },
+            { label: tv.delivery, value: v.delivery },
+            { label: tv.quality, value: v.quality },
+            { label: tv.responsiveness, value: v.responsiveness },
           ].map((row) => (
             <div key={row.label} className="space-y-1.5">
               <div className="flex items-baseline justify-between">
@@ -552,7 +557,8 @@ function Vendor({ project }: { project: Project }) {
 
 /* ---------------------------------------------------------------- Benefits */
 
-function Benefits({ project }: { project: Project }) {
+function Benefits({ project, t }: { project: Project; t: Translations }) {
+  const tb = t.project.benefits;
   const b = project.benefit;
   const fteMax = Math.max(
     ...[b.plannedFte, b.validatedFte, b.realizedFte]
@@ -571,37 +577,37 @@ function Benefits({ project }: { project: Project }) {
     label,
     value: m.status === "available" ? m.value : null,
     max,
-    display: m.status === "available" ? fmt(m.value) : "Data unavailable",
+    display: m.status === "available" ? fmt(m.value) : t.common.dataUnavailable,
   });
 
   return (
     <div className="grid grid-cols-1 border-t border-line xl:grid-cols-2">
       <section className="border-b border-line p-6 xl:border-r xl:border-b-0 lg:p-8">
         <div className="mb-2 flex items-center gap-2">
-          <MonoLabel>HC saving</MonoLabel>
-          <Definition text="Headcount saving in FTE. Validated requires a manager-approved time study; realized requires post-implementation measurement." />
+          <MonoLabel>{tb.hcSaving}</MonoLabel>
+          <Definition text={tb.hcSavingDefinition} />
         </div>
         <p className="mb-6 text-[12px] text-muted">{b.measurementPeriod}</p>
         <BenefitBars
           rows={[
-            row("Planned", b.plannedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
-            row("Validated", b.validatedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
-            row("Realized", b.realizedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
+            row(tb.planned, b.plannedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
+            row(tb.validated, b.validatedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
+            row(tb.realized, b.realizedFte, fteMax, (n) => `${formatNumber(n)} FTE`),
           ]}
         />
       </section>
 
       <section className="p-6 lg:p-8">
         <div className="mb-2 flex items-center gap-2">
-          <MonoLabel>Energy saving</MonoLabel>
-          <Definition text="Annualized kWh saving. Requires baseline, post-implementation value, measurement period, conversion factors and evidence." />
+          <MonoLabel>{tb.energySaving}</MonoLabel>
+          <Definition text={tb.energySavingDefinition} />
         </div>
         <p className="mb-6 text-[12px] text-muted">{b.measurementPeriod}</p>
         <BenefitBars
           rows={[
-            row("Planned", b.plannedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
-            row("Validated", b.validatedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
-            row("Realized", b.realizedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
+            row(tb.planned, b.plannedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
+            row(tb.validated, b.validatedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
+            row(tb.realized, b.realizedKwh, kwhMax, (n) => `${formatNumber(n, { maximumFractionDigits: 0 })} kWh`),
           ]}
         />
       </section>
@@ -611,14 +617,15 @@ function Benefits({ project }: { project: Project }) {
 
 /* -------------------------------------------------------------- Experience */
 
-function Experience({ project }: { project: Project }) {
+function Experience({ project, t }: { project: Project; t: Translations }) {
+  const te = t.project.experience;
   const sections = [
-    { label: "Context", body: `${project.name} · ${project.area} · stage ${project.stage} · lead ${project.lead.name}` },
-    { label: "Goal and delivered outcome", body: "Not yet captured." },
-    { label: "What worked well", body: "Not yet captured." },
-    { label: "Issue / failure and root cause", body: "Not yet captured." },
-    { label: "Countermeasure and recommendation", body: "Not yet captured." },
-    { label: "Reusable artifacts and evidence", body: "Not yet captured." },
+    { label: te.context, body: te.contextValue(project.name, project.area, t.enum.stage[project.stage], project.lead.name) },
+    { label: te.goalOutcome, body: te.notCaptured },
+    { label: te.whatWorked, body: te.notCaptured },
+    { label: te.issueRootCause, body: te.notCaptured },
+    { label: te.countermeasure, body: te.notCaptured },
+    { label: te.reusableArtifacts, body: te.notCaptured },
   ];
 
   return (
@@ -628,10 +635,7 @@ function Experience({ project }: { project: Project }) {
           <span aria-hidden className="mt-0.5 text-accent">
             +
           </span>
-          <p className="text-[13px] leading-relaxed text-text">
-            Jason can draft this report from the project record, milestones and meeting log. It will never
-            submit on your behalf — you review and confirm every field before it is saved.
-          </p>
+          <p className="text-[13px] leading-relaxed text-text">{te.banner}</p>
         </div>
       </div>
       <dl>
@@ -641,7 +645,7 @@ function Experience({ project }: { project: Project }) {
             <dd
               className={cx(
                 "mt-2 text-[14px] leading-relaxed",
-                s.body === "Not yet captured." ? "text-faint" : "text-text",
+                s.body === te.notCaptured ? "text-faint" : "text-text",
               )}
             >
               {s.body}
@@ -656,36 +660,38 @@ function Experience({ project }: { project: Project }) {
 /* ------------------------------------------------------------------- Tabs */
 
 export function ProjectTabs({ project }: { project: Project }) {
-  const [tab, setTab] = useState<Tab>("Overview");
+  const { t } = useLanguage();
+  const [tab, setTab] = useState<Tab>("overview");
+  const tabLabel: Record<Tab, string> = t.project.tabs;
 
   return (
     <>
-      <div role="tablist" aria-label="Project sections" className="flex overflow-x-auto border-b border-line px-5 lg:px-8">
-        {TABS.map((t) => (
+      <div role="tablist" aria-label={t.project.tabsAria} className="flex overflow-x-auto border-b border-line px-5 lg:px-8">
+        {TABS.map((tb) => (
           <button
-            key={t}
+            key={tb}
             role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
+            aria-selected={tab === tb}
+            onClick={() => setTab(tb)}
             className={cx(
               "shrink-0 border-b-2 px-4 py-3.5 text-[13px] transition-colors duration-200 first:pl-0",
-              tab === t
+              tab === tb
                 ? "border-accent text-ink"
                 : "border-transparent text-muted hover:text-ink",
             )}
           >
-            {t}
+            {tabLabel[tb]}
           </button>
         ))}
       </div>
 
       <div className="rise" key={tab}>
-        {tab === "Overview" && <Overview project={project} />}
-        {tab === "Timeline" && <Timeline project={project} />}
-        {tab === "Risks & issues" && <RisksIssues project={project} />}
-        {tab === "Vendor" && <Vendor project={project} />}
-        {tab === "Benefits" && <Benefits project={project} />}
-        {tab === "Experience" && <Experience project={project} />}
+        {tab === "overview" && <Overview project={project} t={t} />}
+        {tab === "timeline" && <Timeline project={project} t={t} />}
+        {tab === "risksIssues" && <RisksIssues project={project} t={t} />}
+        {tab === "vendor" && <Vendor project={project} t={t} />}
+        {tab === "benefits" && <Benefits project={project} t={t} />}
+        {tab === "experience" && <Experience project={project} t={t} />}
       </div>
     </>
   );

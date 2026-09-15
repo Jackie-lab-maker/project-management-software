@@ -1,3 +1,4 @@
+import type { Translations } from "./i18n/translations";
 import type { Health, Measure, Project, Risk, Severity } from "./types";
 
 export const SEVERITY_ORDER: Severity[] = ["Critical", "High", "Medium", "Low"];
@@ -54,29 +55,61 @@ export function issueCounts(project: Project) {
 }
 
 /**
+ * Structured health drivers rather than pre-formatted English strings, so the
+ * UI layer can render them in the active language. Each variant carries only
+ * the raw values it needs to format.
+ */
+export type HealthDriver =
+  | { type: "onHold" }
+  | { type: "cancelled" }
+  | { type: "scheduleVariance"; pct: number }
+  | { type: "criticalRisks"; count: number }
+  | { type: "overdueIssues"; count: number }
+  | { type: "budgetOverrun"; amount: number; currency: string }
+  | { type: "none" };
+
+/**
  * Derived health from schedule, risk, issue and budget rules. Kept explicit and
  * inspectable because the dashboard must be able to explain why a project is
  * At Risk, and any override requires a reason (spec §4).
  */
-export function deriveHealth(project: Project): { health: Health; drivers: string[] } {
-  if (project.stage === "On Hold") return { health: "On Hold", drivers: ["Project stage is On Hold."] };
-  if (project.stage === "Cancelled") return { health: "Cancelled", drivers: ["Project is cancelled."] };
+export function deriveHealth(project: Project): { health: Health; drivers: HealthDriver[] } {
+  if (project.stage === "On Hold") return { health: "On Hold", drivers: [{ type: "onHold" }] };
+  if (project.stage === "Cancelled") return { health: "Cancelled", drivers: [{ type: "cancelled" }] };
 
-  const drivers: string[] = [];
+  const drivers: HealthDriver[] = [];
   const variance = scheduleVariance(project);
-  if (variance <= -15) drivers.push(`Schedule variance ${variance}%.`);
+  if (variance <= -15) drivers.push({ type: "scheduleVariance", pct: variance });
   const criticalRisks = project.risks.filter((r) => r.severity === "Critical").length;
-  if (criticalRisks > 0) drivers.push(`${criticalRisks} critical risk${criticalRisks > 1 ? "s" : ""} open.`);
+  if (criticalRisks > 0) drivers.push({ type: "criticalRisks", count: criticalRisks });
   const overdue = project.issues.filter((i) => i.overdue).length;
-  if (overdue > 0) drivers.push(`${overdue} overdue issue${overdue > 1 ? "s" : ""}.`);
-  if (budgetVariance(project) < 0) {
-    drivers.push(`Forecast exceeds approved budget by ${formatCurrency(Math.abs(budgetVariance(project)), project.budget.currency)}.`);
-  }
+  if (overdue > 0) drivers.push({ type: "overdueIssues", count: overdue });
+  const bv = budgetVariance(project);
+  if (bv < 0) drivers.push({ type: "budgetOverrun", amount: Math.abs(bv), currency: project.budget.currency });
 
   const severe = criticalRisks > 0 || variance <= -15;
   if (severe && drivers.length >= 3) return { health: "Off Track", drivers };
   if (drivers.length > 0) return { health: "At Risk", drivers };
-  return { health: "On Track", drivers: ["No schedule, risk, issue or budget rule triggered."] };
+  return { health: "On Track", drivers: [{ type: "none" }] };
+}
+
+export function formatHealthDriver(driver: HealthDriver, t: Translations): string {
+  switch (driver.type) {
+    case "onHold":
+      return t.project.kpi.driverOnHold;
+    case "cancelled":
+      return t.project.kpi.driverCancelled;
+    case "scheduleVariance":
+      return t.project.kpi.driverScheduleVariance(driver.pct);
+    case "criticalRisks":
+      return t.project.kpi.driverCriticalRisks(driver.count);
+    case "overdueIssues":
+      return t.project.kpi.driverOverdueIssues(driver.count);
+    case "budgetOverrun":
+      return t.project.kpi.driverBudgetOverrun(formatCurrency(driver.amount, driver.currency));
+    case "none":
+      return t.project.kpi.driverNone;
+  }
 }
 
 export function formatCurrency(value: number, currency: string, compact = false): string {

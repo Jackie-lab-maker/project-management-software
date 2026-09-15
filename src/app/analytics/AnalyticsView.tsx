@@ -3,17 +3,23 @@
 import { PageHeader } from "@/components/shell/AppShell";
 import { StageDistribution } from "@/components/ui/charts";
 import { GridRow, IndexMark, MonoLabel, Panel, StatusBadge, cx } from "@/components/ui/primitives";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { knowledge } from "@/lib/mock-data";
 import { formatCurrency, formatNumber, scheduleVariance } from "@/lib/metrics";
 import { useProjects } from "@/lib/project-store";
 
 export function AnalyticsView() {
+  const { t } = useLanguage();
+  const ta = t.analytics;
   const projects = useProjects();
   const active = projects.filter((p) => p.stage !== "Cancelled");
 
   const stageCounts = new Map<string, number>();
   active.forEach((p) => stageCounts.set(p.stage, (stageCounts.get(p.stage) ?? 0) + 1));
-  const distribution = [...stageCounts].map(([label, count]) => ({ label, count }));
+  const distribution = [...stageCounts].map(([label, count]) => ({
+    label: t.enum.stage[label as keyof typeof t.enum.stage],
+    count,
+  }));
 
   const totalApproved = active.reduce((s, p) => s + p.budget.approved, 0);
   const totalForecast = active.reduce((s, p) => s + p.budget.forecastAtCompletion, 0);
@@ -28,33 +34,29 @@ export function AnalyticsView() {
 
   return (
     <>
-      <PageHeader
-        label="Analytics"
-        title="Portfolio analytics"
-        description="Cross-project trends for stage mix, schedule and budget variance, benefit realization, and knowledge health. Figures respect your organizational scope."
-      />
+      <PageHeader label={ta.pageLabel} title={ta.title} description={ta.description} />
 
       <GridRow cols={4}>
         {[
           {
             value: String(active.length),
-            label: "Active projects",
-            note: "Excluding cancelled projects.",
+            label: ta.activeProjectsLabel,
+            note: ta.activeProjectsNote,
           },
           {
             value: `${behind.length}`,
-            label: "Behind plan",
-            note: "Negative schedule variance against the milestone baseline.",
+            label: ta.behindPlanLabel,
+            note: ta.behindPlanNote,
           },
           {
             value: formatCurrency(totalApproved, "USD", true),
-            label: "Approved capital",
-            note: `Forecast at completion ${formatCurrency(totalForecast, "USD", true)}.`,
+            label: ta.approvedCapitalLabel,
+            note: ta.approvedCapitalNote(formatCurrency(totalForecast, "USD", true)),
           },
           {
             value: `${formatNumber(realizedFte)} FTE`,
-            label: "Realized HC saving",
-            note: "Sum of validated post-implementation measurements only.",
+            label: ta.realizedHcLabel,
+            note: ta.realizedHcNote,
           },
         ].map((stat, i) => (
           <div key={stat.label} className="p-6 lg:p-7">
@@ -70,12 +72,12 @@ export function AnalyticsView() {
 
       <div className="grid grid-cols-1 border-b border-line xl:grid-cols-2">
         <section className="border-b border-line p-6 xl:border-r xl:border-b-0 lg:p-8">
-          <MonoLabel className="mb-6">Stage distribution</MonoLabel>
+          <MonoLabel className="mb-6">{ta.stageDistribution}</MonoLabel>
           <StageDistribution segments={distribution} />
         </section>
 
         <section className="p-6 lg:p-8">
-          <MonoLabel className="mb-6">Schedule variance by project</MonoLabel>
+          <MonoLabel className="mb-6">{ta.scheduleVarianceByProject}</MonoLabel>
           <ul className="space-y-4">
             {active.map((p) => {
               const v = scheduleVariance(p);
@@ -109,32 +111,26 @@ export function AnalyticsView() {
         </section>
       </div>
 
-      <Panel label="Knowledge health" title="Approval and review coverage" className="border-x-0 border-t-0">
+      <Panel label={ta.knowledgeHealth} title={ta.approvalReviewCoverage} className="border-x-0 border-t-0">
         <div className="grid grid-cols-1 sm:grid-cols-3 [&>*]:border-b [&>*]:border-line [&>*]:sm:border-r [&>*]:sm:border-b-0 [&>*:last-child]:sm:border-r-0">
           <div className="space-y-2 p-6">
-            <MonoLabel>Approved coverage</MonoLabel>
+            <MonoLabel>{ta.approvedCoverage}</MonoLabel>
             <div className="tnum text-[28px] leading-none font-medium text-ink">{coverage}%</div>
-            <p className="text-[12px] leading-relaxed text-muted">
-              {approvedKnowledge} of {knowledge.length} items are in the Approved state and eligible as Jason context.
-            </p>
+            <p className="text-[12px] leading-relaxed text-muted">{ta.approvedCoverageNote(approvedKnowledge, knowledge.length)}</p>
           </div>
           <div className="space-y-2 p-6">
-            <MonoLabel>Awaiting review</MonoLabel>
+            <MonoLabel>{ta.awaitingReview}</MonoLabel>
             <div className="tnum text-[28px] leading-none font-medium text-warn">
               {knowledge.filter((k) => k.state === "In Review").length}
             </div>
-            <p className="text-[12px] leading-relaxed text-muted">
-              Items in review are excluded from retrieval until approved.
-            </p>
+            <p className="text-[12px] leading-relaxed text-muted">{ta.awaitingReviewNote}</p>
           </div>
           <div className="space-y-2 p-6">
-            <MonoLabel>Reuse signal</MonoLabel>
+            <MonoLabel>{ta.reuseSignal}</MonoLabel>
             <div className="flex items-baseline gap-2">
-              <StatusBadge tone="ok">Healthy</StatusBadge>
+              <StatusBadge tone="ok">{ta.reuseSignalHealthy}</StatusBadge>
             </div>
-            <p className="text-[12px] leading-relaxed text-muted">
-              Lessons learned were cited on 4 of 5 active projects in the last 30 days.
-            </p>
+            <p className="text-[12px] leading-relaxed text-muted">{ta.reuseSignalNote}</p>
           </div>
         </div>
       </Panel>

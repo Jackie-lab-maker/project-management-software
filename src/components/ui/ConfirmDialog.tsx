@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { Button, MonoLabel } from "./primitives";
 
 export function ConfirmDialog({
@@ -20,6 +21,7 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useLanguage();
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   // Confirming or cancelling is the only way out: no click-outside-to-close,
@@ -58,7 +60,7 @@ export function ConfirmDialog({
         </div>
         <div className="flex gap-2.5 p-6">
           <Button ref={cancelRef} variant="secondary" className="flex-1" onClick={onCancel}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button variant="danger" className="flex-1" onClick={onConfirm}>
             {confirmLabel}

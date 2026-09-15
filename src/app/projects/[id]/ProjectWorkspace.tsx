@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/shell/AppShell";
 import { Button, MonoLabel, StatusBadge, toneForHealth } from "@/components/ui/primitives";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { buildingLabel, formatDate, formatTimestamp } from "@/lib/metrics";
 import { deleteProject, useProject } from "@/lib/project-store";
 import { ProjectTabs } from "./ProjectTabs";
 
 export function ProjectWorkspace({ id }: { id: string }) {
   const router = useRouter();
+  const { t } = useLanguage();
+  const tp = t.project;
   const project = useProject(id);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -35,22 +38,20 @@ export function ProjectWorkspace({ id }: { id: string }) {
     if (deleting) {
       return (
         <div className="px-5 py-20 text-center lg:px-8">
-          <MonoLabel className="mb-3">Project deleted</MonoLabel>
-          <p className="mx-auto max-w-md text-[15px] text-muted">Returning to the portfolio…</p>
+          <MonoLabel className="mb-3">{tp.deletedLabel}</MonoLabel>
+          <p className="mx-auto max-w-md text-[15px] text-muted">{tp.deletedDescription}</p>
         </div>
       );
     }
     return (
       <div className="px-5 py-20 text-center lg:px-8">
-        <MonoLabel className="mb-3">Not found</MonoLabel>
-        <p className="mx-auto max-w-md text-[15px] text-muted">
-          No project matches {id}. It may not exist, or you may not have permission to view it.
-        </p>
+        <MonoLabel className="mb-3">{tp.notFoundLabel}</MonoLabel>
+        <p className="mx-auto max-w-md text-[15px] text-muted">{tp.notFoundDescription(id)}</p>
         <Link
           href="/portfolio"
           className="mt-6 inline-flex items-center rounded-[2px] bg-ink px-4 py-2.5 text-sm font-medium text-bg transition-colors hover:bg-accent"
         >
-          Go to portfolio
+          {tp.goToPortfolio}
         </Link>
       </div>
     );
@@ -59,24 +60,24 @@ export function ProjectWorkspace({ id }: { id: string }) {
   return (
     <>
       <PageHeader
-        label={`${project.type} · ${project.id}`}
+        label={`${t.enum.projectType[project.type]} · ${project.id}`}
         title={project.name}
         actions={
           <>
-            <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+            <StatusBadge tone={toneForHealth(project.health)}>{t.enum.health[project.health]}</StatusBadge>
             <Button variant="danger" onClick={() => setConfirmOpen(true)}>
-              Delete project
+              {tp.deleteProject}
             </Button>
           </>
         }
         meta={
           <dl className="flex flex-wrap gap-x-10 gap-y-4">
             {[
-              { term: "Building / Area", value: `${buildingLabel(project)} · ${project.area}` },
-              { term: "Stage", value: project.stage },
-              { term: "Lead", value: project.lead.name },
-              { term: "Start", value: formatDate(project.startDate) },
-              { term: "Target finish", value: formatDate(project.targetFinishDate) },
+              { term: tp.metaBuildingArea, value: `${buildingLabel(project)} · ${project.area}` },
+              { term: tp.metaStage, value: t.enum.stage[project.stage] },
+              { term: tp.metaLead, value: project.lead.name },
+              { term: tp.metaStart, value: formatDate(project.startDate) },
+              { term: tp.metaTargetFinish, value: formatDate(project.targetFinishDate) },
             ].map((item) => (
               <div key={item.term} className="space-y-1.5">
                 <MonoLabel>{item.term}</MonoLabel>
@@ -84,7 +85,7 @@ export function ProjectWorkspace({ id }: { id: string }) {
               </div>
             ))}
             <div className="space-y-1.5">
-              <MonoLabel>Data as of</MonoLabel>
+              <MonoLabel>{tp.metaDataAsOf}</MonoLabel>
               <dd className="tnum text-[14px] text-muted">{formatTimestamp(project.lastUpdated)}</dd>
             </div>
           </dl>
@@ -94,10 +95,10 @@ export function ProjectWorkspace({ id }: { id: string }) {
 
       <ConfirmDialog
         open={confirmOpen}
-        label="Delete project"
-        title={`Delete ${project.id}?`}
-        description={`This removes "${project.name}" and its risks, issues, milestones and benefit data from your view in this browser. This cannot be undone.`}
-        confirmLabel="Delete project"
+        label={tp.deleteDialogLabel}
+        title={tp.deleteDialogTitle(project.id)}
+        description={tp.deleteDialogDescription(project.name)}
+        confirmLabel={tp.deleteProject}
         onConfirm={handleDelete}
         onCancel={() => setConfirmOpen(false)}
       />

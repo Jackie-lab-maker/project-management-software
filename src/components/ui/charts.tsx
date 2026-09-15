@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { ProgressPoint } from "@/lib/types";
 import { MonoLabel } from "./primitives";
 
@@ -7,6 +10,7 @@ import { MonoLabel } from "./primitives";
  * colour-vision differences.
  */
 export function ProgressChart({ data, height = 168 }: { data: ProgressPoint[]; height?: number }) {
+  const { t } = useLanguage();
   const width = 560;
   const padX = 8;
   const padY = 14;
@@ -31,7 +35,7 @@ export function ProgressChart({ data, height = 168 }: { data: ProgressPoint[]; h
         className="w-full"
         style={{ height }}
         role="img"
-        aria-label="Planned versus actual progress over time"
+        aria-label={t.chart.progressAria}
         preserveAspectRatio="none"
       >
         {[0, 25, 50, 75, 100].map((tick) => (
@@ -76,13 +80,13 @@ export function ProgressChart({ data, height = 168 }: { data: ProgressPoint[]; h
             <svg width="18" height="2" aria-hidden>
               <line x1="0" y1="1" x2="18" y2="1" stroke="var(--text-faint)" strokeWidth="1.5" strokeDasharray="4 4" />
             </svg>
-            <MonoLabel>Planned</MonoLabel>
+            <MonoLabel>{t.chart.planned}</MonoLabel>
           </span>
           <span className="flex items-center gap-2">
             <svg width="18" height="2" aria-hidden>
               <line x1="0" y1="1" x2="18" y2="1" stroke="var(--accent)" strokeWidth="2" />
             </svg>
-            <MonoLabel tone="accent">Actual</MonoLabel>
+            <MonoLabel tone="accent">{t.chart.actual}</MonoLabel>
           </span>
         </div>
         {lastActual && (
@@ -94,12 +98,12 @@ export function ProgressChart({ data, height = 168 }: { data: ProgressPoint[]; h
 
       <figcaption className="sr-only">
         <table>
-          <caption>Planned versus actual progress by period</caption>
+          <caption>{t.chart.captionText}</caption>
           <thead>
             <tr>
-              <th scope="col">Period</th>
-              <th scope="col">Planned %</th>
-              <th scope="col">Actual %</th>
+              <th scope="col">{t.chart.colPeriod}</th>
+              <th scope="col">{t.chart.colPlannedPct}</th>
+              <th scope="col">{t.chart.colActualPct}</th>
             </tr>
           </thead>
           <tbody>
@@ -107,7 +111,7 @@ export function ProgressChart({ data, height = 168 }: { data: ProgressPoint[]; h
               <tr key={d.label}>
                 <th scope="row">{d.label}</th>
                 <td>{d.planned}</td>
-                <td>{d.actual === null ? "Data unavailable" : d.actual}</td>
+                <td>{d.actual === null ? t.common.dataUnavailable : d.actual}</td>
               </tr>
             ))}
           </tbody>
@@ -131,6 +135,7 @@ export function BudgetBar({
   forecast: number;
   format: (n: number) => string;
 }) {
+  const { t } = useLanguage();
   const scale = Math.max(approved, forecast);
   const pct = (v: number) => `${(v / scale) * 100}%`;
   const overrun = forecast > approved;
@@ -153,10 +158,10 @@ export function BudgetBar({
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
         {[
-          { term: "Actual", value: actual, swatch: "bg-accent" },
-          { term: "Committed", value: committed, swatch: "bg-accent/30 outline outline-accent/50" },
-          { term: "Approved", value: approved, swatch: "bg-ink" },
-          { term: "Forecast", value: forecast, swatch: overrun ? "bg-risk" : "bg-ok" },
+          { term: t.chart.budgetActual, value: actual, swatch: "bg-accent" },
+          { term: t.chart.budgetCommitted, value: committed, swatch: "bg-accent/30 outline outline-accent/50" },
+          { term: t.chart.budgetApproved, value: approved, swatch: "bg-ink" },
+          { term: t.chart.budgetForecast, value: forecast, swatch: overrun ? "bg-risk" : "bg-ok" },
         ].map((row) => (
           <div key={row.term} className="space-y-1">
             <div className="flex items-center gap-1.5">

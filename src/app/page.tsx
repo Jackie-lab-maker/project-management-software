@@ -13,6 +13,7 @@ import {
   toneForHealth,
   toneForSeverity,
 } from "@/components/ui/primitives";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { currentUser, knowledge } from "@/lib/mock-data";
 import {
   buildingLabel,
@@ -49,6 +50,8 @@ function StatCell({
 }
 
 export default function HomePage() {
+  const { t } = useLanguage();
+  const th = t.home;
   const projects = useProjects();
   const active = projects.filter((p) => p.stage !== "Closed" && p.stage !== "Cancelled");
   const mine = active.filter((p) => p.lead.id === currentUser.id);
@@ -58,49 +61,49 @@ export default function HomePage() {
   );
   const reviewSoon = knowledge.filter((k) => daysUntil(k.reviewDate) < 210);
 
+  const insights = [
+    { text: th.insight1, source: "K-0987 · Rev 2" },
+    { text: th.insight2, source: "Vendor scorecard · 2026-09-12" },
+    { text: th.insight3, source: "Knowledge register" },
+  ];
+
   return (
     <>
       <PageHeader
-        label="Home"
-        title={`Good morning, ${currentUser.name.split(" ")[0]}.`}
-        description="Your assigned work, the projects that need attention today, and what Jason found overnight."
+        label={th.pageLabel}
+        title={th.greeting(currentUser.name.split(" ")[0])}
+        description={th.description}
         actions={
           <>
-            <ButtonLink href="/projects/new">New project</ButtonLink>
+            <ButtonLink href="/projects/new">{th.newProject}</ButtonLink>
             <ButtonLink href="/portfolio" variant="secondary">
-              View portfolio
+              {th.viewPortfolio}
             </ButtonLink>
           </>
         }
       />
 
       <GridRow cols={4}>
-        <StatCell
-          index={1}
-          value={String(mine.length)}
-          label="Projects you lead"
-          note="Active across all stages, excluding closed and cancelled."
-          href="/portfolio"
-        />
+        <StatCell index={1} value={String(mine.length)} label={th.statLeadLabel} note={th.statLeadNote} href="/portfolio" />
         <StatCell
           index={2}
           value={String(atRisk.length)}
-          label="Need attention"
-          note="At Risk or Off Track under the current health rules."
+          label={th.statAttentionLabel}
+          note={th.statAttentionNote}
           href="/portfolio"
         />
         <StatCell
           index={3}
           value={String(overdueIssues.length)}
-          label="Overdue actions"
-          note="Issues past their owner action date across your projects."
+          label={th.statOverdueLabel}
+          note={th.statOverdueNote}
           href="/portfolio"
         />
         <StatCell
           index={4}
           value={String(reviewSoon.length)}
-          label="Knowledge due review"
-          note="Approved documents approaching their scheduled review date."
+          label={th.statKnowledgeLabel}
+          note={th.statKnowledgeNote}
           href="/knowledge"
         />
       </GridRow>
@@ -110,10 +113,10 @@ export default function HomePage() {
         <section className="border-b border-line xl:border-r">
           <header className="flex items-end justify-between gap-4 px-5 py-6 lg:px-8">
             <div className="space-y-2">
-              <MonoLabel>Attention required</MonoLabel>
-              <h2 className="text-[24px] leading-tight">Projects off plan</h2>
+              <MonoLabel>{th.attentionRequired}</MonoLabel>
+              <h2 className="text-[24px] leading-tight">{th.projectsOffPlan}</h2>
             </div>
-            <ArrowLink href="/portfolio">All projects</ArrowLink>
+            <ArrowLink href="/portfolio">{th.allProjects}</ArrowLink>
           </header>
 
           <ul className="border-t border-line">
@@ -134,28 +137,28 @@ export default function HomePage() {
                         </MonoLabel>
                         <h3 className="text-[17px] leading-snug">{project.name}</h3>
                       </div>
-                      <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+                      <StatusBadge tone={toneForHealth(project.health)}>{t.enum.health[project.health]}</StatusBadge>
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                       <span className="flex items-baseline gap-2">
-                        <MonoLabel>Progress</MonoLabel>
+                        <MonoLabel>{th.progress}</MonoLabel>
                         <span className="tnum text-sm text-ink">{progress}%</span>
                       </span>
                       {critical > 0 && (
                         <span className="flex items-baseline gap-2">
-                          <MonoLabel>Critical risks</MonoLabel>
+                          <MonoLabel>{th.criticalRisks}</MonoLabel>
                           <span className="tnum text-sm text-risk">{critical}</span>
                         </span>
                       )}
                       {overdue > 0 && (
                         <span className="flex items-baseline gap-2">
-                          <MonoLabel>Overdue</MonoLabel>
+                          <MonoLabel>{th.overdue}</MonoLabel>
                           <span className="tnum text-sm text-warn">{overdue}</span>
                         </span>
                       )}
                       <span className="flex items-baseline gap-2">
-                        <MonoLabel>Target</MonoLabel>
+                        <MonoLabel>{th.target}</MonoLabel>
                         <span className="tnum text-sm text-muted">
                           {formatDate(project.targetFinishDate)}
                         </span>
@@ -172,24 +175,11 @@ export default function HomePage() {
         <div className="flex flex-col">
           <section className="border-b border-line">
             <header className="space-y-2 px-5 py-6 lg:px-8">
-              <MonoLabel tone="accent">Jason insights</MonoLabel>
-              <h2 className="text-[24px] leading-tight">Overnight findings</h2>
+              <MonoLabel tone="accent">{th.jasonInsights}</MonoLabel>
+              <h2 className="text-[24px] leading-tight">{th.overnightFindings}</h2>
             </header>
             <ul className="border-t border-line">
-              {[
-                {
-                  text: "PRJ202609001 matches the 2025 B3 rail alignment failure pattern. The lesson recommends a receiving inspection gate that is not in the current milestone plan.",
-                  source: "K-0987 · Rev 2",
-                },
-                {
-                  text: "Vendor responsiveness for Daifuku dropped to 64 over the last 30 days, the lowest of any active vendor.",
-                  source: "Vendor scorecard · 2026-09-12",
-                },
-                {
-                  text: "Two approved SOPs referenced by active projects reach their review date within 90 days.",
-                  source: "Knowledge register",
-                },
-              ].map((insight, i) => (
+              {insights.map((insight, i) => (
                 <li key={i} className="border-b border-line px-5 py-4 lg:px-8">
                   <div className="flex gap-3">
                     <span aria-hidden className="mt-1.5 text-accent">
@@ -206,10 +196,10 @@ export default function HomePage() {
           </section>
 
           <Panel
-            label="Knowledge"
-            title="Recently updated"
+            label={th.knowledgeLabel}
+            title={th.recentlyUpdated}
             className="flex-1 border-x-0 border-b border-t-0"
-            action={<ArrowLink href="/knowledge">Hub</ArrowLink>}
+            action={<ArrowLink href="/knowledge">{th.hub}</ArrowLink>}
           >
             <ul>
               {knowledge.slice(0, 4).map((item) => (
@@ -217,12 +207,12 @@ export default function HomePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1.5">
                       <MonoLabel>
-                        {item.category} · {item.revision}
+                        {t.enum.knowledgeCategory[item.category]} · {item.revision}
                       </MonoLabel>
                       <h3 className="truncate text-[14px] leading-snug">{item.title}</h3>
                     </div>
                     <StatusBadge tone={item.state === "Approved" ? "ok" : "none"}>
-                      {item.state}
+                      {t.enum.approvalState[item.state]}
                     </StatusBadge>
                   </div>
                 </li>
@@ -236,16 +226,16 @@ export default function HomePage() {
       <section className="border-b border-line">
         <header className="flex items-end justify-between gap-4 px-5 py-6 lg:px-8">
           <div className="space-y-2">
-            <MonoLabel>Your queue</MonoLabel>
-            <h2 className="text-[24px] leading-tight">Overdue actions</h2>
+            <MonoLabel>{th.yourQueue}</MonoLabel>
+            <h2 className="text-[24px] leading-tight">{th.overdueActions}</h2>
           </div>
-          <MonoLabel>Updated {formatTimestamp(new Date().toISOString())}</MonoLabel>
+          <MonoLabel>{th.updated(formatTimestamp(new Date().toISOString()))}</MonoLabel>
         </header>
         <div className="overflow-x-auto border-t border-line">
           <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b border-line">
-                {["Issue", "Project", "Severity", "Owner", "Age"].map((h) => (
+                {[th.tableIssue, th.tableProject, th.tableSeverity, th.tableOwner, th.tableAge].map((h) => (
                   <th key={h} scope="col" className="mono-label px-5 py-3 font-normal lg:px-8">
                     {h}
                   </th>
@@ -268,7 +258,7 @@ export default function HomePage() {
                     </Link>
                   </td>
                   <td className="px-5 py-4 lg:px-8">
-                    <StatusBadge tone={toneForSeverity(issue.severity)}>{issue.severity}</StatusBadge>
+                    <StatusBadge tone={toneForSeverity(issue.severity)}>{t.enum.severity[issue.severity]}</StatusBadge>
                   </td>
                   <td className="px-5 py-4 text-[13px] text-muted lg:px-8">{issue.owner}</td>
                   <td className="tnum px-5 py-4 text-[13px] text-warn lg:px-8">{issue.ageDays}d</td>

@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { jasonThread } from "@/lib/mock-data";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { JasonMessage } from "@/lib/types";
 import { Button, MonoLabel, cx } from "@/components/ui/primitives";
 
 function Citations({ message }: { message: JasonMessage }) {
+  const { t } = useLanguage();
   if (!message.citations?.length) return null;
   return (
     <div className="mt-3 space-y-2 border-t border-line pt-3">
-      <MonoLabel>Sources</MonoLabel>
+      <MonoLabel>{t.jason.sources}</MonoLabel>
       <ul className="space-y-1.5">
         {message.citations.map((c) => (
           <li key={c.knowledgeId}>
@@ -35,6 +37,7 @@ function Citations({ message }: { message: JasonMessage }) {
 
 /** Every state-changing action is previewed and gated behind explicit confirmation. */
 function ActionPreview({ message }: { message: JasonMessage }) {
+  const { t } = useLanguage();
   const [state, setState] = useState<"pending" | "confirmed" | "discarded">("pending");
   const action = message.proposedAction;
   if (!action) return null;
@@ -43,7 +46,7 @@ function ActionPreview({ message }: { message: JasonMessage }) {
     return (
       <div className="mt-3 border border-line bg-sunken p-3">
         <MonoLabel tone={state === "confirmed" ? "accent" : "faint"}>
-          {state === "confirmed" ? "Action confirmed · logged to audit" : "Action discarded"}
+          {state === "confirmed" ? t.jason.actionConfirmed : t.jason.actionDiscarded}
         </MonoLabel>
       </div>
     );
@@ -52,7 +55,7 @@ function ActionPreview({ message }: { message: JasonMessage }) {
   return (
     <div className="mt-3 border border-accent/35 bg-accent-wash">
       <div className="border-b border-accent/25 px-3 py-2">
-        <MonoLabel tone="accent">Proposed change · confirmation required</MonoLabel>
+        <MonoLabel tone="accent">{t.jason.proposedChange}</MonoLabel>
         <p className="mt-1.5 text-xs leading-relaxed text-ink">{action.summary}</p>
       </div>
       <dl className="divide-y divide-line/70">
@@ -71,10 +74,10 @@ function ActionPreview({ message }: { message: JasonMessage }) {
       </dl>
       <div className="flex gap-2 border-t border-accent/25 p-3">
         <Button className="px-3 py-1.5 text-xs" onClick={() => setState("confirmed")}>
-          Confirm and apply
+          {t.jason.confirmAndApply}
         </Button>
         <Button variant="secondary" className="px-3 py-1.5 text-xs" onClick={() => setState("discarded")}>
-          Discard
+          {t.jason.discard}
         </Button>
       </div>
     </div>
@@ -82,11 +85,12 @@ function ActionPreview({ message }: { message: JasonMessage }) {
 }
 
 function Message({ message }: { message: JasonMessage }) {
+  const { t } = useLanguage();
   const isUser = message.author === "user";
   return (
     <article className={cx("border-b border-line px-5 py-4", isUser && "bg-sunken")}>
       <MonoLabel tone={isUser ? "faint" : "accent"} className="mb-2">
-        {isUser ? "You" : "Jason"}
+        {isUser ? t.jason.you : "Jason"}
       </MonoLabel>
       <div className="space-y-2 text-[13px] leading-relaxed text-text">
         {message.text.split("\n\n").map((para, i) => (
@@ -100,11 +104,12 @@ function Message({ message }: { message: JasonMessage }) {
 }
 
 export function JasonPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useLanguage();
   const [draft, setDraft] = useState("");
 
   return (
     <aside
-      aria-label="Jason AI assistant"
+      aria-label={t.jason.panelAria}
       aria-hidden={!open}
       className={cx(
         "fixed inset-y-0 right-0 z-40 flex w-[380px] max-w-full flex-col border-l border-line bg-surface transition-transform duration-200 ease-out",
@@ -113,12 +118,12 @@ export function JasonPanel({ open, onClose }: { open: boolean; onClose: () => vo
     >
       <header className="flex items-center justify-between border-b border-line px-5 py-4">
         <div>
-          <MonoLabel tone="accent">AI Operations Agent</MonoLabel>
+          <MonoLabel tone="accent">{t.jason.aiOperationsAgent}</MonoLabel>
           <h2 className="mt-1 text-[17px] leading-tight">Jason</h2>
         </div>
         <button
           onClick={onClose}
-          aria-label="Close Jason panel"
+          aria-label={t.nav.closeJasonPanel}
           className="flex size-7 items-center justify-center border border-line text-muted transition-colors hover:border-ink hover:text-ink"
         >
           <span aria-hidden>✕</span>
@@ -139,20 +144,20 @@ export function JasonPanel({ open, onClose }: { open: boolean; onClose: () => vo
         }}
       >
         <label htmlFor="jason-input" className="sr-only">
-          Ask Jason
+          {t.jason.askJason}
         </label>
         <textarea
           id="jason-input"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={3}
-          placeholder="Ask about a project, or describe a draft to create…"
+          placeholder={t.jason.inputPlaceholder}
           className="w-full resize-none border border-line bg-bg px-3 py-2.5 text-[13px] text-text placeholder:text-faint focus:border-ink focus:outline-none"
         />
         <div className="mt-2.5 flex items-center justify-between">
-          <MonoLabel>Answers cite approved sources only</MonoLabel>
+          <MonoLabel>{t.jason.citeNote}</MonoLabel>
           <Button type="submit" className="px-3 py-1.5 text-xs" disabled={!draft.trim()}>
-            Send
+            {t.jason.send}
           </Button>
         </div>
       </form>

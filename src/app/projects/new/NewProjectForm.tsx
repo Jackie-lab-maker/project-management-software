@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { PageHeader } from "@/components/shell/AppShell";
 import { Button, MonoLabel, StatusBadge, cx } from "@/components/ui/primitives";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { eligibleLeads } from "@/lib/mock-data";
 import {
   buildProject,
@@ -15,9 +17,9 @@ import {
 } from "@/lib/project-id";
 import { buildingLabel } from "@/lib/metrics";
 import { addCreatedProject, useProjects } from "@/lib/project-store";
-import type { ProjectType } from "@/lib/types";
+import type { Building, ProjectType } from "@/lib/types";
 
-const BUILDINGS = ["B1", "B2", "B3", "B5", "Others"] as const;
+const BUILDINGS: Building[] = ["B1", "B2", "B3", "B5", "Others"];
 const CURRENCIES = ["USD", "SGD", "JPY", "EUR"] as const;
 
 const EMPTY: ProjectDraft = {
@@ -38,6 +40,7 @@ function Field({
   label,
   htmlFor,
   required,
+  requiredLabel,
   error,
   hint,
   children,
@@ -45,6 +48,7 @@ function Field({
   label: string;
   htmlFor: string;
   required?: boolean;
+  requiredLabel: string;
   error?: string;
   hint?: string;
   children: React.ReactNode;
@@ -55,7 +59,7 @@ function Field({
         <span className="mono-label">{label}</span>
         {required && (
           <span className="mono-label text-accent" aria-hidden>
-            required
+            {requiredLabel}
           </span>
         )}
       </label>
@@ -78,6 +82,8 @@ const inputClass = (invalid?: boolean) =>
   );
 
 export function NewProjectForm() {
+  const { t } = useLanguage();
+  const tp = t.newProject;
   const projects = useProjects();
   const [draft, setDraft] = useState<ProjectDraft>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -126,21 +132,21 @@ export function NewProjectForm() {
   };
 
   if (created) {
+    const location = draft.building === "Others" ? draft.otherBuildingName ?? "" : draft.building;
     return (
       <div className="px-5 py-16 lg:px-8">
         <div className="mx-auto max-w-lg space-y-6 border border-line p-8 text-center">
-          <MonoLabel tone="accent">Project created</MonoLabel>
+          <MonoLabel tone="accent">{tp.createdBadge}</MonoLabel>
           <div className="tnum text-[34px] leading-none font-medium tracking-[-0.03em] text-ink">{created}</div>
           <p className="text-[14px] leading-relaxed text-muted">
-            {draft.name} has been created in {draft.building === "Others" ? draft.otherBuildingName : draft.building} ·{" "}
-            {draft.area}. The ID is immutable and the creation event is recorded in the audit log.
+            {tp.createdDescription(draft.name, location, draft.area)}
           </p>
           <div className="flex justify-center gap-2.5">
             <Link
               href="/portfolio"
               className="inline-flex items-center rounded-[2px] bg-ink px-4 py-2.5 text-sm font-medium text-bg transition-colors hover:bg-accent"
             >
-              Go to portfolio
+              {tp.goToPortfolio}
             </Link>
             <button
               onClick={() => {
@@ -151,7 +157,7 @@ export function NewProjectForm() {
               }}
               className="inline-flex items-center rounded-[2px] border border-line px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-surface-hover"
             >
-              Create another
+              {tp.createAnother}
             </button>
           </div>
         </div>
@@ -160,254 +166,277 @@ export function NewProjectForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
-      {/* Fields */}
-      <div className="border-b border-line lg:border-r lg:border-b-0">
-        <fieldset className="space-y-6 border-b border-line p-6 lg:p-8">
-          <legend className="sr-only">Location</legend>
-          <MonoLabel>01 · Location</MonoLabel>
+    <>
+      <PageHeader label={tp.pageLabel} title={tp.title} description={tp.description} />
+      <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
+        {/* Fields */}
+        <div className="border-b border-line lg:border-r lg:border-b-0">
+          <fieldset className="space-y-6 border-b border-line p-6 lg:p-8">
+            <legend className="sr-only">{tp.legendLocation}</legend>
+            <MonoLabel>{tp.sectionLocation}</MonoLabel>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Field label="Building" htmlFor="building" required error={errors.building}>
-              <select
-                id="building"
-                value={draft.building}
-                onChange={(e) => set("building", e.target.value)}
-                aria-invalid={!!errors.building}
-                className={inputClass(!!errors.building)}
-              >
-                <option value="">Select a building…</option>
-                {BUILDINGS.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            {draft.building === "Others" && (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <Field
-                label="Other building name"
-                htmlFor="otherBuildingName"
+                label={tp.fieldBuilding}
+                htmlFor="building"
                 required
-                error={errors.otherBuildingName}
+                requiredLabel={t.common.required}
+                error={errors.building && tp.errors[errors.building]}
               >
-                <input
-                  id="otherBuildingName"
-                  value={draft.otherBuildingName}
-                  onChange={(e) => set("otherBuildingName", e.target.value)}
-                  aria-invalid={!!errors.otherBuildingName}
-                  className={inputClass(!!errors.otherBuildingName)}
-                  placeholder="e.g. Central Utility Building"
-                />
-              </Field>
-            )}
-
-            <Field label="Area" htmlFor="area" required error={errors.area}>
-              <input
-                id="area"
-                value={draft.area}
-                onChange={(e) => set("area", e.target.value)}
-                aria-invalid={!!errors.area}
-                className={inputClass(!!errors.area)}
-                placeholder="e.g. Litho Bay 4"
-              />
-            </Field>
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-6 border-b border-line p-6 lg:p-8">
-          <legend className="sr-only">Project</legend>
-          <MonoLabel>02 · Project</MonoLabel>
-
-          <Field label="Project name" htmlFor="name" required error={errors.name}>
-            <input
-              id="name"
-              value={draft.name}
-              onChange={(e) => set("name", e.target.value)}
-              aria-invalid={!!errors.name}
-              className={inputClass(!!errors.name)}
-              placeholder="e.g. Litho Bay AMHS Stocker Retrofit"
-            />
-          </Field>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Field
-              label="Project type"
-              htmlFor="type"
-              required
-              hint="Determines the ID prefix: PRJ for new projects, CIP for continuous improvement."
-            >
-              <div className="flex">
-                {(["New Project", "CIP"] as ProjectType[]).map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => set("type", t)}
-                    aria-pressed={draft.type === t}
-                    className={cx(
-                      "flex-1 border px-3 py-2 text-sm transition-colors duration-200",
-                      draft.type === t
-                        ? "border-ink bg-ink text-bg"
-                        : "border-line text-muted hover:border-ink hover:text-ink",
-                      t === "CIP" && "-ml-px",
-                    )}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            <Field
-              label="Project lead"
-              htmlFor="leadId"
-              required
-              error={errors.leadId}
-              hint="Only users holding Project Lead or System Admin can be assigned."
-            >
-              <select
-                id="leadId"
-                value={draft.leadId}
-                onChange={(e) => set("leadId", e.target.value)}
-                aria-invalid={!!errors.leadId}
-                className={inputClass(!!errors.leadId)}
-              >
-                <option value="">Select a lead…</option>
-                {eligibleLeads.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} — {u.role}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Field label="Start date" htmlFor="startDate" required error={errors.startDate}>
-              <input
-                id="startDate"
-                type="date"
-                value={draft.startDate}
-                onChange={(e) => set("startDate", e.target.value)}
-                aria-invalid={!!errors.startDate}
-                className={inputClass(!!errors.startDate)}
-              />
-            </Field>
-
-            <Field label="Target finish date" htmlFor="targetFinishDate" required error={errors.targetFinishDate}>
-              <input
-                id="targetFinishDate"
-                type="date"
-                value={draft.targetFinishDate}
-                onChange={(e) => set("targetFinishDate", e.target.value)}
-                aria-invalid={!!errors.targetFinishDate}
-                className={inputClass(!!errors.targetFinishDate)}
-              />
-            </Field>
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-6 p-6 lg:p-8">
-          <legend className="sr-only">Optional</legend>
-          <MonoLabel>03 · Optional</MonoLabel>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Field label="Budget" htmlFor="budget" hint="Currency-aware. Can be added later.">
-              <div className="flex">
                 <select
-                  aria-label="Currency"
-                  value={draft.budgetCurrency}
-                  onChange={(e) => set("budgetCurrency", e.target.value)}
-                  className="border border-line bg-bg px-2.5 py-2 text-sm text-text focus:border-ink focus:outline-none"
+                  id="building"
+                  value={draft.building}
+                  onChange={(e) => set("building", e.target.value)}
+                  aria-invalid={!!errors.building}
+                  className={inputClass(!!errors.building)}
                 >
-                  {CURRENCIES.map((c) => (
-                    <option key={c}>{c}</option>
+                  <option value="">{tp.selectBuildingPlaceholder}</option>
+                  {BUILDINGS.map((b) => (
+                    <option key={b} value={b}>
+                      {t.enum.building[b] ?? b}
+                    </option>
                   ))}
                 </select>
+              </Field>
+
+              {draft.building === "Others" && (
+                <Field
+                  label={tp.fieldOtherBuildingName}
+                  htmlFor="otherBuildingName"
+                  required
+                  requiredLabel={t.common.required}
+                  error={errors.otherBuildingName && tp.errors[errors.otherBuildingName]}
+                >
+                  <input
+                    id="otherBuildingName"
+                    value={draft.otherBuildingName}
+                    onChange={(e) => set("otherBuildingName", e.target.value)}
+                    aria-invalid={!!errors.otherBuildingName}
+                    className={inputClass(!!errors.otherBuildingName)}
+                    placeholder={tp.otherBuildingPlaceholder}
+                  />
+                </Field>
+              )}
+
+              <Field
+                label={tp.fieldArea}
+                htmlFor="area"
+                required
+                requiredLabel={t.common.required}
+                error={errors.area && tp.errors[errors.area]}
+              >
                 <input
-                  id="budget"
-                  inputMode="decimal"
-                  value={draft.budgetAmount}
-                  onChange={(e) => set("budgetAmount", e.target.value.replace(/[^\d.]/g, ""))}
-                  placeholder="0"
-                  className={cx(inputClass(), "-ml-px tnum")}
+                  id="area"
+                  value={draft.area}
+                  onChange={(e) => set("area", e.target.value)}
+                  aria-invalid={!!errors.area}
+                  className={inputClass(!!errors.area)}
+                  placeholder={tp.areaPlaceholder}
                 />
-              </div>
-            </Field>
+              </Field>
+            </div>
+          </fieldset>
 
-            <Field label="Vendor name" htmlFor="vendor" hint="Contact, scope and attachments can be added in the workspace.">
+          <fieldset className="space-y-6 border-b border-line p-6 lg:p-8">
+            <legend className="sr-only">{tp.legendProject}</legend>
+            <MonoLabel>{tp.sectionProject}</MonoLabel>
+
+            <Field
+              label={tp.fieldProjectName}
+              htmlFor="name"
+              required
+              requiredLabel={t.common.required}
+              error={errors.name && tp.errors[errors.name]}
+            >
               <input
-                id="vendor"
-                value={draft.vendorName}
-                onChange={(e) => set("vendorName", e.target.value)}
-                className={inputClass()}
-                placeholder="e.g. Daifuku Automation"
+                id="name"
+                value={draft.name}
+                onChange={(e) => set("name", e.target.value)}
+                aria-invalid={!!errors.name}
+                className={inputClass(!!errors.name)}
+                placeholder={tp.projectNamePlaceholder}
               />
             </Field>
-          </div>
-        </fieldset>
-      </div>
 
-      {/* Summary rail */}
-      <aside className="lg:sticky lg:top-[57px] lg:self-start">
-        <div className="space-y-4 border-b border-line p-6 lg:p-7">
-          <MonoLabel>Generated ID · preview</MonoLabel>
-          <div className="tnum text-[26px] leading-none font-medium tracking-[-0.03em] text-ink">{previewId}</div>
-          <p className="text-[12px] leading-relaxed text-muted">
-            Format <span className="font-mono">{"{prefix}{YYYY}{MM}{sequence}"}</span>. The final sequence is
-            assigned by a transactional counter at creation, so concurrent creates cannot collide.
-          </p>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <Field label={tp.fieldProjectType} htmlFor="type" required requiredLabel={t.common.required} hint={tp.typeHint}>
+                <div className="flex">
+                  {(["New Project", "CIP"] as ProjectType[]).map((ty) => (
+                    <button
+                      key={ty}
+                      type="button"
+                      onClick={() => set("type", ty)}
+                      aria-pressed={draft.type === ty}
+                      className={cx(
+                        "flex-1 border px-3 py-2 text-sm transition-colors duration-200",
+                        draft.type === ty
+                          ? "border-ink bg-ink text-bg"
+                          : "border-line text-muted hover:border-ink hover:text-ink",
+                        ty === "CIP" && "-ml-px",
+                      )}
+                    >
+                      {t.enum.projectType[ty]}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <Field
+                label={tp.fieldProjectLead}
+                htmlFor="leadId"
+                required
+                requiredLabel={t.common.required}
+                error={errors.leadId && tp.errors[errors.leadId]}
+                hint={tp.leadHint}
+              >
+                <select
+                  id="leadId"
+                  value={draft.leadId}
+                  onChange={(e) => set("leadId", e.target.value)}
+                  aria-invalid={!!errors.leadId}
+                  className={inputClass(!!errors.leadId)}
+                >
+                  <option value="">{tp.selectLeadPlaceholder}</option>
+                  {eligibleLeads.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} — {t.enum.role[u.role]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <Field
+                label={tp.fieldStartDate}
+                htmlFor="startDate"
+                required
+                requiredLabel={t.common.required}
+                error={errors.startDate && tp.errors[errors.startDate]}
+              >
+                <input
+                  id="startDate"
+                  type="date"
+                  value={draft.startDate}
+                  onChange={(e) => set("startDate", e.target.value)}
+                  aria-invalid={!!errors.startDate}
+                  className={inputClass(!!errors.startDate)}
+                />
+              </Field>
+
+              <Field
+                label={tp.fieldTargetFinishDate}
+                htmlFor="targetFinishDate"
+                required
+                requiredLabel={t.common.required}
+                error={errors.targetFinishDate && tp.errors[errors.targetFinishDate]}
+              >
+                <input
+                  id="targetFinishDate"
+                  type="date"
+                  value={draft.targetFinishDate}
+                  onChange={(e) => set("targetFinishDate", e.target.value)}
+                  aria-invalid={!!errors.targetFinishDate}
+                  className={inputClass(!!errors.targetFinishDate)}
+                />
+              </Field>
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-6 p-6 lg:p-8">
+            <legend className="sr-only">{tp.legendOptional}</legend>
+            <MonoLabel>{tp.sectionOptional}</MonoLabel>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <Field label={tp.fieldBudget} htmlFor="budget" requiredLabel={t.common.required} hint={tp.budgetHint}>
+                <div className="flex">
+                  <select
+                    aria-label="Currency"
+                    value={draft.budgetCurrency}
+                    onChange={(e) => set("budgetCurrency", e.target.value)}
+                    className="border border-line bg-bg px-2.5 py-2 text-sm text-text focus:border-ink focus:outline-none"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                  <input
+                    id="budget"
+                    inputMode="decimal"
+                    value={draft.budgetAmount}
+                    onChange={(e) => set("budgetAmount", e.target.value.replace(/[^\d.]/g, ""))}
+                    placeholder="0"
+                    className={cx(inputClass(), "-ml-px tnum")}
+                  />
+                </div>
+              </Field>
+
+              <Field label={tp.fieldVendorName} htmlFor="vendor" requiredLabel={t.common.required} hint={tp.vendorHint}>
+                <input
+                  id="vendor"
+                  value={draft.vendorName}
+                  onChange={(e) => set("vendorName", e.target.value)}
+                  className={inputClass()}
+                  placeholder={tp.vendorNamePlaceholder}
+                />
+              </Field>
+            </div>
+          </fieldset>
         </div>
 
-        {duplicate && (
-          <div className="space-y-3 border-b border-line bg-warn-wash p-6 lg:p-7">
-            <StatusBadge tone="warn">Possible duplicate</StatusBadge>
-            <p className="text-[13px] leading-relaxed text-text">
-              An active project already exists with the same building, area and name.
-            </p>
-            <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-text">
-              <input
-                type="checkbox"
-                checked={duplicateAcknowledged}
-                onChange={(e) => setDuplicateAcknowledged(e.target.checked)}
-                className="mt-0.5 size-4 accent-[var(--accent)]"
-              />
-              Create it anyway — I have confirmed this is a separate project.
-            </label>
+        {/* Summary rail */}
+        <aside className="lg:sticky lg:top-[57px] lg:self-start">
+          <div className="space-y-4 border-b border-line p-6 lg:p-7">
+            <MonoLabel>{tp.idPreviewLabel}</MonoLabel>
+            <div className="tnum text-[26px] leading-none font-medium tracking-[-0.03em] text-ink">{previewId}</div>
+            <p className="text-[12px] leading-relaxed text-muted">{tp.idPreviewHint}</p>
           </div>
-        )}
 
-        {submitted && Object.keys(errors).length > 0 && (
-          <div className="space-y-2 border-b border-line bg-risk-wash p-6 lg:p-7" role="alert">
-            <StatusBadge tone="risk">{Object.keys(errors).length} field(s) need attention</StatusBadge>
-            <ul className="space-y-1">
-              {Object.entries(errors).map(([field, message]) => (
-                <li key={field} className="text-[12px] leading-relaxed text-risk">
-                  <a href={`#${field}`} className="underline underline-offset-2">
-                    {message}
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {duplicate && (
+            <div className="space-y-3 border-b border-line bg-warn-wash p-6 lg:p-7">
+              <StatusBadge tone="warn">{tp.duplicateBadge}</StatusBadge>
+              <p className="text-[13px] leading-relaxed text-text">{tp.duplicateDescription}</p>
+              <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-text">
+                <input
+                  type="checkbox"
+                  checked={duplicateAcknowledged}
+                  onChange={(e) => setDuplicateAcknowledged(e.target.checked)}
+                  className="mt-0.5 size-4 accent-[var(--accent)]"
+                />
+                {tp.duplicateAcknowledge}
+              </label>
+            </div>
+          )}
+
+          {submitted && Object.keys(errors).length > 0 && (
+            <div className="space-y-2 border-b border-line bg-risk-wash p-6 lg:p-7" role="alert">
+              <StatusBadge tone="risk">{tp.fieldsNeedAttention(Object.keys(errors).length)}</StatusBadge>
+              <ul className="space-y-1">
+                {Object.entries(errors).map(([field, code]) => (
+                  <li key={field} className="text-[12px] leading-relaxed text-risk">
+                    <a href={`#${field}`} className="underline underline-offset-2">
+                      {tp.errors[code as keyof typeof tp.errors]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="space-y-3 p-6 lg:p-7">
+            <Button type="submit" className="w-full" disabled={!!duplicate && !duplicateAcknowledged}>
+              {tp.createProject}
+            </Button>
+            <Link
+              href="/portfolio"
+              className="flex w-full items-center justify-center rounded-[2px] border border-line px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-surface-hover"
+            >
+              {tp.cancel}
+            </Link>
+            <p className="text-[12px] leading-relaxed text-muted">{tp.auditFootnote}</p>
           </div>
-        )}
-
-        <div className="space-y-3 p-6 lg:p-7">
-          <Button type="submit" className="w-full" disabled={!!duplicate && !duplicateAcknowledged}>
-            Create project
-          </Button>
-          <Link
-            href="/portfolio"
-            className="flex w-full items-center justify-center rounded-[2px] border border-line px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-surface-hover"
-          >
-            Cancel
-          </Link>
-          <p className="text-[12px] leading-relaxed text-muted">
-            Creation is recorded in the audit log with actor, timestamp and the full field set.
-          </p>
-        </div>
-      </aside>
-    </form>
+        </aside>
+      </form>
+    </>
   );
 }

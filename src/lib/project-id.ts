@@ -47,7 +47,23 @@ export interface ProjectDraft {
   vendorName: string;
 }
 
-export type FieldErrors = Partial<Record<keyof ProjectDraft, string>>;
+/**
+ * Codes rather than messages: validation is language-independent logic, so
+ * it returns what went wrong and the form renders that into the active
+ * language via translations.ts's newProject.errors.
+ */
+export type FieldErrorCode =
+  | "buildingRequired"
+  | "otherBuildingRequired"
+  | "areaRequired"
+  | "nameRequired"
+  | "leadRequired"
+  | "leadInvalidRole"
+  | "startDateRequired"
+  | "targetDateRequired"
+  | "targetBeforeStart";
+
+export type FieldErrors = Partial<Record<keyof ProjectDraft, FieldErrorCode>>;
 
 /** Mirrors the validation rules in spec §3 so the form and API agree. */
 export function validateDraft(
@@ -56,24 +72,24 @@ export function validateDraft(
 ): FieldErrors {
   const errors: FieldErrors = {};
 
-  if (!draft.building) errors.building = "Building is required.";
+  if (!draft.building) errors.building = "buildingRequired";
   if (draft.building === "Others" && !draft.otherBuildingName?.trim()) {
-    errors.otherBuildingName = "Name the building when Others is selected.";
+    errors.otherBuildingName = "otherBuildingRequired";
   }
-  if (!draft.area.trim()) errors.area = "Area is required.";
-  if (!draft.name.trim()) errors.name = "Project name is required.";
+  if (!draft.area.trim()) errors.area = "areaRequired";
+  if (!draft.name.trim()) errors.name = "nameRequired";
 
   if (!draft.leadId) {
-    errors.leadId = "Project lead is required.";
+    errors.leadId = "leadRequired";
   } else if (!opts.eligibleLeadIds.includes(draft.leadId)) {
-    errors.leadId = "Lead must hold the Project Lead or System Admin role.";
+    errors.leadId = "leadInvalidRole";
   }
 
-  if (!draft.startDate) errors.startDate = "Start date is required.";
+  if (!draft.startDate) errors.startDate = "startDateRequired";
   if (!draft.targetFinishDate) {
-    errors.targetFinishDate = "Target finish date is required.";
+    errors.targetFinishDate = "targetDateRequired";
   } else if (draft.startDate && draft.targetFinishDate < draft.startDate) {
-    errors.targetFinishDate = "Target finish date cannot precede the start date.";
+    errors.targetFinishDate = "targetBeforeStart";
   }
 
   return errors;

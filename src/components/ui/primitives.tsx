@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 export const cx = (...parts: (string | false | null | undefined)[]) =>
   parts.filter(Boolean).join(" ");
@@ -214,11 +215,12 @@ export function toneForSeverity(severity: string): StatusTone {
    ---------------------------------------------------------------- */
 
 export function Definition({ text }: { text: string }) {
+  const { t } = useLanguage();
   return (
     <span className="group/def relative inline-flex">
       <button
         type="button"
-        aria-label="Show calculation assumptions"
+        aria-label={t.common.showAssumptions}
         className="flex size-4 items-center justify-center rounded-full border border-line font-mono text-[9px] text-faint transition-colors hover:border-ink hover:text-ink"
       >
         ?
@@ -235,9 +237,10 @@ export function Definition({ text }: { text: string }) {
 
 /** Renders an unavailable metric distinctly so it never reads as zero. */
 export function Unavailable({ reason }: { reason?: string }) {
+  const { t } = useLanguage();
   return (
     <span className="inline-flex items-center gap-1.5 text-muted">
-      <span className="text-[15px]">Data unavailable</span>
+      <span className="text-[15px]">{t.common.dataUnavailable}</span>
       {reason && <Definition text={reason} />}
     </span>
   );

@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { PageHeader } from "@/components/shell/AppShell";
 import { StageDistribution } from "@/components/ui/charts";
 import {
+  ButtonLink,
   MonoLabel,
   StatusBadge,
   cx,
   toneForHealth,
 } from "@/components/ui/primitives";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   buildingLabel,
   formatCurrency,
@@ -18,6 +21,7 @@ import {
   weightedProgress,
 } from "@/lib/metrics";
 import { useProjects } from "@/lib/project-store";
+import type { Translations } from "@/lib/i18n/translations";
 import type { Project, Stage } from "@/lib/types";
 
 const STAGES: Stage[] = [
@@ -38,12 +42,16 @@ function FilterSelect({
   label,
   value,
   options,
+  optionLabel,
   onChange,
+  allLabel,
 }: {
   label: string;
   value: string;
   options: string[];
+  optionLabel: (o: string) => string;
   onChange: (v: string) => void;
+  allLabel: string;
 }) {
   const id = `filter-${label.toLowerCase().replace(/\s+/g, "-")}`;
   return (
@@ -57,10 +65,10 @@ function FilterSelect({
         onChange={(e) => onChange(e.target.value)}
         className="w-full border border-line bg-bg px-2.5 py-1.5 text-[13px] text-text focus:border-ink focus:outline-none"
       >
-        <option value="">All</option>
+        <option value="">{allLabel}</option>
         {options.map((o) => (
           <option key={o} value={o}>
-            {o}
+            {optionLabel(o)}
           </option>
         ))}
       </select>
@@ -68,7 +76,7 @@ function FilterSelect({
   );
 }
 
-function ProgressTrack({ project }: { project: Project }) {
+function ProgressTrack({ project, t }: { project: Project; t: Translations }) {
   const actual = weightedProgress(project);
   const planned = plannedProgress(project);
   return (
@@ -79,18 +87,20 @@ function ProgressTrack({ project }: { project: Project }) {
           className="absolute -top-0.5 -bottom-0.5 w-px bg-ink"
           style={{ left: `${planned}%` }}
           aria-hidden
-          title={`Planned ${planned}%`}
+          title={t.portfolio.plannedTitle(planned)}
         />
       </div>
       <div className="flex justify-between">
         <span className="tnum text-[12px] text-ink">{actual}%</span>
-        <span className="tnum text-[12px] text-faint">plan {planned}%</span>
+        <span className="tnum text-[12px] text-faint">{t.portfolio.planInline(planned)}</span>
       </div>
     </div>
   );
 }
 
 export function PortfolioBrowser() {
+  const { t } = useLanguage();
+  const tp = t.portfolio;
   const projects = useProjects();
   const [query, setQuery] = useState("");
   const [building, setBuilding] = useState("");
@@ -114,41 +124,69 @@ export function PortfolioBrowser() {
   const distribution = useMemo(() => {
     const counts = new Map<string, number>();
     filtered.forEach((p) => counts.set(p.stage, (counts.get(p.stage) ?? 0) + 1));
-    return STAGES.filter((s) => counts.has(s)).map((s) => ({ label: s, count: counts.get(s) ?? 0 }));
-  }, [filtered]);
+    return STAGES.filter((s) => counts.has(s)).map((s) => ({ label: t.enum.stage[s], count: counts.get(s) ?? 0 }));
+  }, [filtered, t]);
 
   const buildings = [...new Set(projects.map(buildingLabel))];
 
+  const viewLabel: Record<View, string> = { table: tp.viewTable, cards: tp.viewCards, timeline: tp.viewTimeline };
+
   return (
     <>
+      <PageHeader
+        label={tp.pageLabel}
+        title={tp.title}
+        description={tp.description}
+        actions={<ButtonLink href="/projects/new">{tp.newProject}</ButtonLink>}
+      />
+
       {/* Controls */}
       <div className="grid grid-cols-1 border-b border-line lg:grid-cols-[1fr_320px]">
         <div className="space-y-5 border-b border-line p-5 lg:border-b-0 lg:border-r lg:p-8">
           <div className="space-y-1.5">
             <label htmlFor="portfolio-search" className="mono-label block">
-              Search
+              {tp.search}
             </label>
             <input
               id="portfolio-search"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Project name, ID, area, or lead…"
+              placeholder={tp.searchPlaceholder}
               className="w-full border border-line bg-bg px-3 py-2 text-sm text-text placeholder:text-faint focus:border-ink focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <FilterSelect label="Building" value={building} options={buildings} onChange={setBuilding} />
-            <FilterSelect label="Type" value={type} options={["New Project", "CIP"]} onChange={setType} />
-            <FilterSelect label="Stage" value={stage} options={STAGES} onChange={setStage} />
+            <FilterSelect
+              label={tp.buildingLabel}
+              value={building}
+              options={buildings}
+              optionLabel={(o) => o}
+              onChange={setBuilding}
+              allLabel={t.common.all}
+            />
+            <FilterSelect
+              label={tp.typeLabel}
+              value={type}
+              options={["New Project", "CIP"]}
+              optionLabel={(o) => t.enum.projectType[o as "New Project" | "CIP"]}
+              onChange={setType}
+              allLabel={t.common.all}
+            />
+            <FilterSelect
+              label={tp.stageLabel}
+              value={stage}
+              options={STAGES}
+              optionLabel={(o) => t.enum.stage[o as Stage]}
+              onChange={setStage}
+              allLabel={t.common.all}
+            />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <MonoLabel>
-              {filtered.length} of {projects.length} projects
-            </MonoLabel>
-            <div role="tablist" aria-label="View" className="flex border border-line">
+            <MonoLabel>{tp.countOf(filtered.length, projects.length)}</MonoLabel>
+            <div role="tablist" aria-label={tp.viewAria} className="flex border border-line">
               {(["table", "cards", "timeline"] as View[]).map((v) => (
                 <button
                   key={v}
@@ -160,7 +198,7 @@ export function PortfolioBrowser() {
                     view === v ? "bg-ink text-bg" : "text-muted hover:bg-surface-hover hover:text-ink",
                   )}
                 >
-                  {v}
+                  {viewLabel[v]}
                 </button>
               ))}
             </div>
@@ -168,21 +206,19 @@ export function PortfolioBrowser() {
         </div>
 
         <div className="space-y-4 p-5 lg:p-8">
-          <MonoLabel>Stage distribution</MonoLabel>
+          <MonoLabel>{tp.stageDistribution}</MonoLabel>
           {distribution.length > 0 ? (
             <StageDistribution segments={distribution} />
           ) : (
-            <p className="text-sm text-muted">Data unavailable for the current filters.</p>
+            <p className="text-sm text-muted">{tp.dataUnavailableFiltered}</p>
           )}
         </div>
       </div>
 
       {filtered.length === 0 && (
         <div className="px-5 py-20 text-center lg:px-8">
-          <MonoLabel className="mb-3">No matches</MonoLabel>
-          <p className="text-[15px] text-muted">
-            No project matches these filters. Clear a filter or widen the search.
-          </p>
+          <MonoLabel className="mb-3">{tp.noMatches}</MonoLabel>
+          <p className="text-[15px] text-muted">{tp.noMatchesDescription}</p>
         </div>
       )}
 
@@ -191,13 +227,21 @@ export function PortfolioBrowser() {
           <table className="w-full min-w-[980px] text-left">
             <thead>
               <tr className="border-b border-line">
-                {["Project", "Building / Area", "Type", "Stage", "Health", "Lead", "Progress", "Target", "Budget"].map(
-                  (h) => (
-                    <th key={h} scope="col" className="mono-label px-5 py-3 font-normal first:pl-5 lg:first:pl-8">
-                      {h}
-                    </th>
-                  ),
-                )}
+                {[
+                  tp.colProject,
+                  tp.colBuildingArea,
+                  tp.colType,
+                  tp.colStage,
+                  tp.colHealth,
+                  tp.colLead,
+                  tp.colProgress,
+                  tp.colTarget,
+                  tp.colBudget,
+                ].map((h) => (
+                  <th key={h} scope="col" className="mono-label px-5 py-3 font-normal first:pl-5 lg:first:pl-8">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -213,15 +257,15 @@ export function PortfolioBrowser() {
                     {buildingLabel(project)} · {project.area}
                   </td>
                   <td className="px-5 py-4">
-                    <span className="mono-label">{project.type}</span>
+                    <span className="mono-label">{t.enum.projectType[project.type]}</span>
                   </td>
-                  <td className="px-5 py-4 text-[13px] text-ink">{project.stage}</td>
+                  <td className="px-5 py-4 text-[13px] text-ink">{t.enum.stage[project.stage]}</td>
                   <td className="px-5 py-4">
-                    <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+                    <StatusBadge tone={toneForHealth(project.health)}>{t.enum.health[project.health]}</StatusBadge>
                   </td>
                   <td className="px-5 py-4 text-[13px] text-muted">{project.lead.name}</td>
                   <td className="w-36 px-5 py-4">
-                    <ProgressTrack project={project} />
+                    <ProgressTrack project={project} t={t} />
                   </td>
                   <td className="tnum px-5 py-4 text-[13px] text-muted">
                     {formatDate(project.targetFinishDate)}
@@ -248,25 +292,25 @@ export function PortfolioBrowser() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <MonoLabel tone="accent">{project.id}</MonoLabel>
-                  <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+                  <StatusBadge tone={toneForHealth(project.health)}>{t.enum.health[project.health]}</StatusBadge>
                 </div>
 
                 <div className="space-y-2">
                   <h3 className="text-[19px] leading-snug">{project.name}</h3>
                   <MonoLabel>
-                    {buildingLabel(project)} · {project.area} · {project.type}
+                    {buildingLabel(project)} · {project.area} · {t.enum.projectType[project.type]}
                   </MonoLabel>
                 </div>
 
-                <ProgressTrack project={project} />
+                <ProgressTrack project={project} t={t} />
 
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-line pt-4">
                   <div className="space-y-1">
-                    <MonoLabel>Stage</MonoLabel>
-                    <dd className="text-[13px] text-ink">{project.stage}</dd>
+                    <MonoLabel>{tp.cardStage}</MonoLabel>
+                    <dd className="text-[13px] text-ink">{t.enum.stage[project.stage]}</dd>
                   </div>
                   <div className="space-y-1">
-                    <MonoLabel>Schedule</MonoLabel>
+                    <MonoLabel>{tp.cardSchedule}</MonoLabel>
                     <dd
                       className={cx(
                         "tnum text-[13px]",
@@ -278,11 +322,11 @@ export function PortfolioBrowser() {
                     </dd>
                   </div>
                   <div className="space-y-1">
-                    <MonoLabel>Lead</MonoLabel>
+                    <MonoLabel>{tp.cardLead}</MonoLabel>
                     <dd className="text-[13px] text-muted">{project.lead.name}</dd>
                   </div>
                   <div className="space-y-1">
-                    <MonoLabel>Target</MonoLabel>
+                    <MonoLabel>{tp.cardTarget}</MonoLabel>
                     <dd className="tnum text-[13px] text-muted">{formatDate(project.targetFinishDate)}</dd>
                   </div>
                 </dl>
@@ -298,17 +342,19 @@ export function PortfolioBrowser() {
 }
 
 function Timeline({ projects }: { projects: Project[] }) {
+  const { lang } = useLanguage();
   const dates = projects.flatMap((p) => [new Date(p.startDate), new Date(p.targetFinishDate)]);
   const min = new Date(Math.min(...dates.map((d) => d.getTime())));
   const max = new Date(Math.max(...dates.map((d) => d.getTime())));
   const span = max.getTime() - min.getTime() || 1;
   const pos = (d: string) => ((new Date(d).getTime() - min.getTime()) / span) * 100;
+  const locale = lang === "zh" ? "zh-CN" : "en-US";
 
   const months: { label: string; left: number }[] = [];
   const cursor = new Date(min.getFullYear(), min.getMonth(), 1);
   while (cursor <= max) {
     months.push({
-      label: cursor.toLocaleDateString("en-US", { month: "short" }),
+      label: cursor.toLocaleDateString(locale, { month: "short" }),
       left: ((cursor.getTime() - min.getTime()) / span) * 100,
     });
     cursor.setMonth(cursor.getMonth() + 1);

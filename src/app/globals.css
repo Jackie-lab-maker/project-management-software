@@ -13,8 +13,6 @@
    brand/legal sign-off is obtained (spec §7).
    ============================================================ */
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 :root {
   --bg: #ffffff;
   --bg-sunken: #fafafa;
@@ -44,39 +42,16 @@
   --none: #6b7280;
   --none-wash: rgba(107, 114, 128, 0.1);
 
+  /* Pure black/white for assets published in exactly those two variants
+     (the Micron mark) — deliberately not --ink, which is near-black/white. */
+  --logo: #000000;
+
   --radius: 2px;
 }
 
-:root[data-theme="dark"] {
-  --bg: #0f0f0f;
-  --bg-sunken: #151515;
-  --bg-warm: #17150f;
-  --surface: #131313;
-  --surface-hover: #1a1a1a;
-
-  --line: #2a2a2a;
-  --line-strong: #f5f5f5;
-  --line-faint: rgba(255, 255, 255, 0.06);
-
-  --ink: #fafafa;
-  --text: #e8e9ed;
-  --text-muted: #9ba1ad;
-  --text-faint: #6b7280;
-
-  --accent: #ff7a2f;
-  --accent-hover: #ff9457;
-  --accent-wash: rgba(255, 122, 47, 0.12);
-
-  --ok: #4ade80;
-  --ok-wash: rgba(74, 222, 128, 0.12);
-  --warn: #fbbf24;
-  --warn-wash: rgba(251, 191, 36, 0.12);
-  --risk: #f87171;
-  --risk-wash: rgba(248, 113, 113, 0.12);
-  --none: #9ba1ad;
-  --none-wash: rgba(155, 161, 173, 0.12);
-}
-
+/* Theme is either explicit light (--theme="light") or System, which follows
+   the OS via this media query. There is no explicit dark override — see
+   ThemeToggle. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f0f0f;
@@ -106,6 +81,8 @@
     --risk-wash: rgba(248, 113, 113, 0.12);
     --none: #9ba1ad;
     --none-wash: rgba(155, 161, 173, 0.12);
+
+    --logo: #ffffff;
   }
 }
 
@@ -138,6 +115,8 @@
   --color-none: var(--none);
   --color-none-wash: var(--none-wash);
 
+  --color-logo: var(--logo);
+
   --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
 
@@ -146,9 +125,6 @@
 
 html {
   color-scheme: light;
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
