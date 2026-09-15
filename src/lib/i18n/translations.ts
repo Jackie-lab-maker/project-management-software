@@ -13,7 +13,7 @@ export type Lang = "en" | "zh";
 /**
  * UI chrome only — labels, headings, table headers, buttons, tooltips,
  * validation messages. Seed/mock data (project names, knowledge titles, risk
- * and issue descriptions, user names, Jason's example conversation, audit
+ * and issue descriptions, user names, the agent's example conversation, audit
  * actor/target/timestamp values) is intentionally left in English: in a real
  * deployment that content comes from a database in whatever language it was
  * entered, the same way this app doesn't retranslate a project called
@@ -52,8 +52,7 @@ export interface Translations {
     signedIn: string;
     searchAria: string;
     searchPlaceholder: string;
-    jason: string;
-    closeJasonPanel: string;
+    closeAgentPanel: string;
   };
   footer: {
     trademark: string;
@@ -79,7 +78,7 @@ export interface Translations {
     criticalRisks: string;
     overdue: string;
     target: string;
-    jasonInsights: string;
+    agentInsights: string;
     overnightFindings: string;
     insight1: string;
     insight2: string;
@@ -390,7 +389,8 @@ export interface Translations {
     rolePermissions: Record<Role, string>;
     auditActions: string[];
   };
-  jason: {
+  agent: {
+    name: string;
     aiOperationsAgent: string;
     panelAria: string;
     sources: string;
@@ -400,7 +400,7 @@ export interface Translations {
     confirmAndApply: string;
     discard: string;
     you: string;
-    askJason: string;
+    askAgent: string;
     inputPlaceholder: string;
     citeNote: string;
     send: string;
@@ -461,8 +461,7 @@ export const en: Translations = {
     signedIn: "Signed in",
     searchAria: "Search projects and knowledge",
     searchPlaceholder: "Search projects, documents…",
-    jason: "Jason",
-    closeJasonPanel: "Close Jason panel",
+    closeAgentPanel: "Close agent panel",
   },
   footer: {
     trademark:
@@ -471,7 +470,7 @@ export const en: Translations = {
   home: {
     pageLabel: "Home",
     greeting: (firstName) => `Good morning, ${firstName}.`,
-    description: "Your assigned work, the projects that need attention today, and what Jason found overnight.",
+    description: "Your assigned work, the projects that need attention today, and what the agent found overnight.",
     newProject: "New project",
     viewPortfolio: "View portfolio",
     statLeadLabel: "Projects you lead",
@@ -489,7 +488,7 @@ export const en: Translations = {
     criticalRisks: "Critical risks",
     overdue: "Overdue",
     target: "Target",
-    jasonInsights: "Jason insights",
+    agentInsights: "Agent insights",
     overnightFindings: "Overnight findings",
     insight1:
       "PRJ202609001 matches the 2025 B3 rail alignment failure pattern. The lesson recommends a receiving inspection gate that is not in the current milestone plan.",
@@ -665,7 +664,7 @@ export const en: Translations = {
       openActions: "Open actions",
       noVendor: "No vendor is attached to this project.",
       aiUsageLabel: "AI usage",
-      aiUsageDefinition: "Jason activity scoped to this project. Prompt text is never exposed to users without permission.",
+      aiUsageDefinition: "Agent activity scoped to this project. Prompt text is never exposed to users without permission.",
       actionsConfirmed: "Actions confirmed",
       promptsSummary: (users, hours) => `prompts · ${users} users · ~${hours}h saved`,
     },
@@ -738,7 +737,7 @@ export const en: Translations = {
     },
     experience: {
       banner:
-        "Jason can draft this report from the project record, milestones and meeting log. It will never submit on your behalf — you review and confirm every field before it is saved.",
+        "The agent can draft this report from the project record, milestones and meeting log. It will never submit on your behalf — you review and confirm every field before it is saved.",
       context: "Context",
       contextValue: (name, area, stage, lead) => `${name} · ${area} · stage ${stage} · lead ${lead}`,
       goalOutcome: "Goal and delivered outcome",
@@ -753,7 +752,7 @@ export const en: Translations = {
     pageLabel: "Knowledge",
     title: "Knowledge hub",
     description:
-      "Governed engineering knowledge. Only approved revisions are used as trusted Jason context; drafts and in-review items are visible but excluded from retrieval.",
+      "Governed engineering knowledge. Only approved revisions are used as trusted agent context; drafts and in-review items are visible but excluded from retrieval.",
     search: "Search",
     searchPlaceholder: "Title, tag, owner…",
     searchHint: "Full-text and semantic search across permitted content.",
@@ -761,7 +760,7 @@ export const en: Translations = {
     allCategories: "All categories",
     approvalState: "Approval state",
     countOf: (filtered, total) => `${filtered} of ${total} items`,
-    approvedOnlyNote: "Approved revisions only in Jason context",
+    approvedOnlyNote: "Approved revisions only in agent context",
     noMatches: "No matches",
     noMatchesDescription: "Nothing matches these facets. Clear a filter or widen the search.",
     owner: (name) => `Owner ${name}`,
@@ -786,7 +785,7 @@ export const en: Translations = {
     knowledgeHealth: "Knowledge health",
     approvalReviewCoverage: "Approval and review coverage",
     approvedCoverage: "Approved coverage",
-    approvedCoverageNote: (approved, total) => `${approved} of ${total} items are in the Approved state and eligible as Jason context.`,
+    approvedCoverageNote: (approved, total) => `${approved} of ${total} items are in the Approved state and eligible as agent context.`,
     awaitingReview: "Awaiting review",
     awaitingReviewNote: "Items in review are excluded from retrieval until approved.",
     reuseSignal: "Reuse signal",
@@ -814,7 +813,7 @@ export const en: Translations = {
       "Audit events are immutable and retained per Micron internal policy. Retention periods, export controls, and the list of classifications excluded from AI processing must be confirmed with IT, security, and legal before production launch.",
     rolePermissions: {
       "System Admin": "Configure users, roles, taxonomies, retention, integrations, and all records.",
-      "Project Lead": "Create and manage assigned projects, milestones, team, documents, reports, and Jason actions.",
+      "Project Lead": "Create and manage assigned projects, milestones, team, documents, reports, and agent actions.",
       Engineer: "Contribute to assigned projects; upload, revise and search permitted knowledge; submit lessons learned.",
       Technician: "View assigned project information; update assigned tasks; upload field evidence when permitted.",
       Manager: "Portfolio visibility, approvals, reporting, and controlled access within their organization.",
@@ -828,9 +827,10 @@ export const en: Translations = {
       "Attempted download of restricted document",
     ],
   },
-  jason: {
+  agent: {
+    name: "Agent",
     aiOperationsAgent: "AI Operations Agent",
-    panelAria: "Jason AI assistant",
+    panelAria: "Agent AI assistant",
     sources: "Sources",
     actionConfirmed: "Action confirmed · logged to audit",
     actionDiscarded: "Action discarded",
@@ -838,7 +838,7 @@ export const en: Translations = {
     confirmAndApply: "Confirm and apply",
     discard: "Discard",
     you: "You",
-    askJason: "Ask Jason",
+    askAgent: "Ask agent",
     inputPlaceholder: "Ask about a project, or describe a draft to create…",
     citeNote: "Answers cite approved sources only",
     send: "Send",
@@ -955,8 +955,7 @@ export const zh: Translations = {
     signedIn: "已登录",
     searchAria: "搜索项目和知识",
     searchPlaceholder: "搜索项目、文档…",
-    jason: "Jason",
-    closeJasonPanel: "关闭 Jason 面板",
+    closeAgentPanel: "关闭智能体面板",
   },
   footer: {
     trademark: "Micron™ 及美光轨道标志是美光科技公司（Micron Technology, Inc.）的商标 · 仅限内部使用 · 正式发布前请与美光法务及品牌部门确认最终文案。",
@@ -964,7 +963,7 @@ export const zh: Translations = {
   home: {
     pageLabel: "首页",
     greeting: (firstName) => `早上好，${firstName}。`,
-    description: "您负责的工作、今天需要关注的项目，以及 Jason 昨夜发现的问题。",
+    description: "您负责的工作、今天需要关注的项目，以及智能体昨夜发现的问题。",
     newProject: "新建项目",
     viewPortfolio: "查看项目组合",
     statLeadLabel: "您负责的项目",
@@ -982,7 +981,7 @@ export const zh: Translations = {
     criticalRisks: "重大风险",
     overdue: "已逾期",
     target: "目标日期",
-    jasonInsights: "Jason 洞察",
+    agentInsights: "智能体洞察",
     overnightFindings: "夜间发现",
     insight1: "PRJ202609001 与 2025 年 B3 导轨对准失效模式相符。该经验建议增加到货检验环节，但目前的里程碑计划中尚未包含。",
     insight2: "过去 30 天内，Daifuku 的供应商响应速度降至 64，为所有在建供应商中最低。",
@@ -1150,7 +1149,7 @@ export const zh: Translations = {
       openActions: "待处理事项",
       noVendor: "该项目未关联供应商。",
       aiUsageLabel: "AI 使用情况",
-      aiUsageDefinition: "Jason 在该项目范围内的活动情况。未经授权，提示词内容不会向用户展示。",
+      aiUsageDefinition: "智能体在该项目范围内的活动情况。未经授权，提示词内容不会向用户展示。",
       actionsConfirmed: "已确认操作数",
       promptsSummary: (users, hours) => `次提问 · ${users} 位用户 · 约节省 ${hours} 小时`,
     },
@@ -1219,7 +1218,7 @@ export const zh: Translations = {
       realized: "已实现",
     },
     experience: {
-      banner: "Jason 可根据项目记录、里程碑和会议纪要起草本报告，但绝不会代您提交 — 您需在保存前审阅并确认每一项内容。",
+      banner: "智能体可根据项目记录、里程碑和会议纪要起草本报告，但绝不会代您提交 — 您需在保存前审阅并确认每一项内容。",
       context: "背景信息",
       contextValue: (name, area, stage, lead) => `${name} · ${area} · 阶段：${stage} · 负责人：${lead}`,
       goalOutcome: "目标与实际成果",
@@ -1233,7 +1232,7 @@ export const zh: Translations = {
   knowledge: {
     pageLabel: "知识库",
     title: "知识中心",
-    description: "受管控的工程知识库。仅已批准版本会作为 Jason 的可信上下文；草稿及待审阅项目可见但不参与检索。",
+    description: "受管控的工程知识库。仅已批准版本会作为智能体的可信上下文；草稿及待审阅项目可见但不参与检索。",
     search: "搜索",
     searchPlaceholder: "标题、标签、负责人…",
     searchHint: "在权限范围内的内容中进行全文及语义搜索。",
@@ -1241,7 +1240,7 @@ export const zh: Translations = {
     allCategories: "所有分类",
     approvalState: "批准状态",
     countOf: (filtered, total) => `共 ${total} 项，显示 ${filtered} 项`,
-    approvedOnlyNote: "仅已批准版本纳入 Jason 上下文",
+    approvedOnlyNote: "仅已批准版本纳入智能体上下文",
     noMatches: "无匹配结果",
     noMatchesDescription: "没有内容符合当前筛选条件。请清除筛选条件或扩大搜索范围。",
     owner: (name) => `负责人 ${name}`,
@@ -1265,7 +1264,7 @@ export const zh: Translations = {
     knowledgeHealth: "知识健康度",
     approvalReviewCoverage: "批准与复审覆盖率",
     approvedCoverage: "已批准覆盖率",
-    approvedCoverageNote: (approved, total) => `共 ${total} 项中有 ${approved} 项处于已批准状态，可作为 Jason 上下文。`,
+    approvedCoverageNote: (approved, total) => `共 ${total} 项中有 ${approved} 项处于已批准状态，可作为智能体上下文。`,
     awaitingReview: "待复审",
     awaitingReviewNote: "待审阅项目在获批前不参与检索。",
     reuseSignal: "复用信号",
@@ -1292,7 +1291,7 @@ export const zh: Translations = {
     auditRetentionBody: "审计事件不可更改，并按美光内部政策保留。保留期限、导出控制，以及排除在 AI 处理范围之外的分类清单，须在正式上线前经 IT、安全及法务部门确认。",
     rolePermissions: {
       "System Admin": "配置用户、角色、分类体系、保留策略、集成及全部记录。",
-      "Project Lead": "创建并管理所负责的项目、里程碑、团队、文档、报告及 Jason 操作。",
+      "Project Lead": "创建并管理所负责的项目、里程碑、团队、文档、报告及智能体操作。",
       Engineer: "参与所分配的项目；上传、修订及搜索权限范围内的知识内容；提交经验总结。",
       Technician: "查看所分配的项目信息；更新所分配的任务；在获授权时上传现场证据。",
       Manager: "在所属组织范围内拥有项目组合可见性、审批权限及报表访问权限，并可进行受控访问。",
@@ -1306,9 +1305,10 @@ export const zh: Translations = {
       "尝试下载受限文档",
     ],
   },
-  jason: {
+  agent: {
+    name: "智能体",
     aiOperationsAgent: "AI 运营助手",
-    panelAria: "Jason AI 助手",
+    panelAria: "智能体 AI 助手",
     sources: "来源",
     actionConfirmed: "操作已确认 · 已记录至审计日志",
     actionDiscarded: "操作已放弃",
@@ -1316,7 +1316,7 @@ export const zh: Translations = {
     confirmAndApply: "确认并应用",
     discard: "放弃",
     you: "您",
-    askJason: "向 Jason 提问",
+    askAgent: "向智能体提问",
     inputPlaceholder: "询问某个项目，或描述需要起草的内容…",
     citeNote: "回答仅引用已批准的来源",
     send: "发送",

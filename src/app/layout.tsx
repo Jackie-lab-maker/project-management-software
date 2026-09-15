@@ -26,7 +26,7 @@ const plexMono = localFont({
 export const metadata: Metadata = {
   title: "Automation Digital Brain",
   description:
-    "Operational source of truth for Micron's Automation Department: projects, controlled knowledge, and Jason.",
+    "Operational source of truth for Micron's Automation Department: projects, controlled knowledge, and an AI agent.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

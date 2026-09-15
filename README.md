@@ -1,6 +1,6 @@
 # Automation Digital Brain
 
-An operational source of truth software: project execution, controlled engineering knowledge, and an AI assistant (**Jason**) in one governed home, built against an internal build specification (not included in this repo).
+An operational source of truth software: project execution, controlled engineering knowledge, and an AI assistant (**Agent**, a placeholder name pending final branding) in one governed home, built against an internal build specification (not included in this repo).
 
 **Live:** [project-management-software-ruby.vercel.app](https://project-management-software-ruby.vercel.app)
 
@@ -12,7 +12,7 @@ Frontend prototype — Phase 1 of the spec's delivery sequence. There is **no ba
 
 | Route | What's there |
 | --- | --- |
-| `/` | Home dashboard — your projects, at-risk items, Jason's overnight findings, overdue actions |
+| `/` | Home dashboard — your projects, at-risk items, the agent's overnight findings, overdue actions |
 | `/portfolio` | Searchable project list with building/type/stage filters, table / cards / timeline views |
 | `/projects/new` | Create-project form with live ID preview, duplicate detection, and full field validation |
 | `/projects/[id]` | Project workspace — the full KPI dashboard (status, progress, budget, ROI, vendor, risks, issues, benefits), plus delete with confirmation |
@@ -20,7 +20,7 @@ Frontend prototype — Phase 1 of the spec's delivery sequence. There is **no ba
 | `/analytics` | Portfolio-level trends: stage mix, schedule variance, knowledge health |
 | `/admin` | Roles matrix and audit log |
 
-Jason ships as a persistent right-side panel on every screen: cited sources on every knowledge-grounded answer, and a confirmation gate on every state-changing action it proposes.
+The agent ships as a persistent right-side panel on every screen: cited sources on every knowledge-grounded answer, and a confirmation gate on every state-changing action it proposes.
 
 ## Design system
 
@@ -61,7 +61,7 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · deployed
 src/
   app/                  routes (App Router)
   components/
-    shell/               app chrome — nav, header, Jason panel, theme toggle
+    shell/               app chrome — nav, header, agent panel, theme toggle
     ui/                  design-system primitives (buttons, badges, charts, dialogs)
   lib/
     types.ts              domain model
@@ -73,4 +73,4 @@ src/
 
 ## Not yet built
 
-Everything in the spec's Phase 2–4: knowledge revision/approval workflows, real Jason (currently mocked conversation + UI), SSO/RBAC enforcement, the transactional backend and database, file ingestion, and the security/audit requirements in spec §10.
+Everything in the spec's Phase 2–4: knowledge revision/approval workflows, a real agent backend (currently mocked conversation + UI), SSO/RBAC enforcement, the transactional backend and database, file ingestion, and the security/audit requirements in spec §10.

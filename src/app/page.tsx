@@ -171,11 +171,11 @@ export default function HomePage() {
           </ul>
         </section>
 
-        {/* Jason insights + knowledge */}
+        {/* Agent insights + knowledge */}
         <div className="flex flex-col">
           <section className="border-b border-line">
             <header className="space-y-2 px-5 py-6 lg:px-8">
-              <MonoLabel tone="accent">{th.jasonInsights}</MonoLabel>
+              <MonoLabel tone="accent">{th.agentInsights}</MonoLabel>
               <h2 className="text-[24px] leading-tight">{th.overnightFindings}</h2>
             </header>
             <ul className="border-t border-line">

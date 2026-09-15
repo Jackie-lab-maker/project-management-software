@@ -186,12 +186,12 @@ export interface Citation {
   effectiveDate: string;
 }
 
-export interface JasonMessage {
+export interface AgentMessage {
   id: string;
-  author: "user" | "jason";
+  author: "user" | "agent";
   text: string;
   citations?: Citation[];
-  /** A state-changing action Jason proposes; always requires confirmation. */
+  /** A state-changing action the agent proposes; always requires confirmation. */
   proposedAction?: {
     summary: string;
     changes: { field: string; from: string; to: string }[];

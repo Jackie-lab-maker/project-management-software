@@ -12,7 +12,7 @@ const ROLES: Role[] = ["System Admin", "Project Lead", "Engineer", "Technician",
 // action and outcome are UI copy describing them, translated via t.admin.
 const AUDIT = [
   { actor: "Mei Tan", target: "PRJ202609001", outcome: "Success" as const, at: "2026-09-15 08:41 UTC" },
-  { actor: "Jason (on behalf of Mei Tan)", target: "PRJ202609001", outcome: "Pending" as const, at: "2026-09-15 08:39 UTC" },
+  { actor: "Agent (on behalf of Mei Tan)", target: "PRJ202609001", outcome: "Pending" as const, at: "2026-09-15 08:39 UTC" },
   { actor: "Arun Prakash", target: "K-1188", outcome: "Success" as const, at: "2026-09-14 16:02 UTC" },
   { actor: "Priya Sharma", target: "Sofia Lindqvist", outcome: "Success" as const, at: "2026-09-14 11:20 UTC" },
   { actor: "Visitor session", target: "K-1201", outcome: "Denied" as const, at: "2026-09-13 09:55 UTC" },

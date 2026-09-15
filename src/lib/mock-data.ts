@@ -1,7 +1,7 @@
 import {
   available,
   unavailable,
-  type JasonMessage,
+  type AgentMessage,
   type KnowledgeItem,
   type Project,
   type User,
@@ -605,7 +605,7 @@ export const knowledge: KnowledgeItem[] = [
   },
 ];
 
-export const jasonThread: JasonMessage[] = [
+export const agentThread: AgentMessage[] = [
   {
     id: "m1",
     author: "user",
@@ -613,7 +613,7 @@ export const jasonThread: JasonMessage[] = [
   },
   {
     id: "m2",
-    author: "jason",
+    author: "agent",
     text:
       "Two items drive the At Risk health on PRJ202609001. R-04 (critical) — the controller firmware revision has not been validated against fab MES, with the validation window still unscheduled. I-15 (high, 11 days old, overdue) — the vendor has not supplied updated electrical schematics, which blocks the FAT checklist section 3.\n\nThis pattern has precedent: the 2025 B3 retrofit lost three weeks to rail segments that shipped outside flatness tolerance and were not caught at receiving. The lesson recommends a receiving inspection gate before install, which is not currently in the Bay 4 milestone plan.",
     citations: [
@@ -628,7 +628,7 @@ export const jasonThread: JasonMessage[] = [
   },
   {
     id: "m4",
-    author: "jason",
+    author: "agent",
     text:
       "I can add that milestone. Review the change below and confirm — I will not write anything until you approve.",
     proposedAction: {

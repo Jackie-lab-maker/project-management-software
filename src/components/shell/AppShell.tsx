@@ -6,7 +6,7 @@ import { useState, type ReactNode } from "react";
 import { currentUser } from "@/lib/mock-data";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MonoLabel, cx } from "@/components/ui/primitives";
-import { JasonPanel } from "./JasonPanel";
+import { AgentPanel } from "./AgentPanel";
 import { LanguageToggle } from "./LanguageToggle";
 import { MicronLogo } from "./MicronLogo";
 import { ThemeToggle } from "./ThemeToggle";
@@ -30,7 +30,7 @@ function Wordmark() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const [jasonOpen, setJasonOpen] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
 
   const NAV = [
     { href: "/", label: t.nav.home, glyph: "◧" },
@@ -96,13 +96,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {/* Main column */}
         {/* Padding compensation must start at the same breakpoint as the
-            fixed Jason panel itself (no breakpoint — always on lg+ screens
-            per JasonPanel's width), not a wider one: between lg and xl the
+            fixed agent panel itself (no breakpoint — always on lg+ screens
+            per AgentPanel's width), not a wider one: between lg and xl the
             content previously had no compensation while the panel (z-40,
             above the header's z-30) still covered the header's right edge,
             making the header's own controls — theme, language, even the
-            Jason toggle button — unclickable in that range. */}
-        <div className={cx("flex min-w-0 flex-1 flex-col transition-[padding] duration-200", jasonOpen && "lg:pr-[380px]")}>
+            agent toggle button — unclickable in that range. */}
+        <div className={cx("flex min-w-0 flex-1 flex-col transition-[padding] duration-200", agentOpen && "lg:pr-[380px]")}>
           <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-line bg-surface/92 px-5 py-3 backdrop-blur-sm lg:px-8">
             <div className="lg:hidden">
               <Wordmark />
@@ -121,17 +121,17 @@ export function AppShell({ children }: { children: ReactNode }) {
               <LanguageToggle />
               <ThemeToggle />
               <button
-                onClick={() => setJasonOpen((v) => !v)}
-                aria-expanded={jasonOpen}
+                onClick={() => setAgentOpen((v) => !v)}
+                aria-expanded={agentOpen}
                 className={cx(
                   "flex items-center gap-2 border px-3 py-1.5 text-[13px] transition-colors duration-200",
-                  jasonOpen
+                  agentOpen
                     ? "border-ink bg-ink text-bg"
                     : "border-line text-ink hover:border-ink hover:bg-surface-hover",
                 )}
               >
                 <span aria-hidden className="size-1.5 bg-accent" />
-                {t.nav.jason}
+                {t.agent.name}
               </button>
             </div>
           </header>
@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <JasonPanel open={jasonOpen} onClose={() => setJasonOpen(false)} />
+      <AgentPanel open={agentOpen} onClose={() => setAgentOpen(false)} />
     </div>
   );
 }
