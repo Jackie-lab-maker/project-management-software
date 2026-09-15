@@ -26,9 +26,10 @@ import {
   scheduleVariance,
   weightedProgress,
 } from "@/lib/metrics";
+import { PROJECT_FOLDERS, type ProjectFolder } from "@/lib/project-files";
 import type { Measure, Project } from "@/lib/types";
 
-const TABS = ["overview", "timeline", "risksIssues", "vendor", "benefits", "experience"] as const;
+const TABS = ["overview", "timeline", "risksIssues", "vendor", "benefits", "experience", "file"] as const;
 type Tab = (typeof TABS)[number];
 
 /* ---------------------------------------------------------------- KPI cell */
@@ -661,6 +662,89 @@ function Experience({ project, t }: { project: Project; t: Translations }) {
   );
 }
 
+/* ------------------------------------------------------------------- Files */
+
+function Files({ t }: { t: Translations }) {
+  const tf = t.project.files;
+  const [selectedKey, setSelectedKey] = useState(PROJECT_FOLDERS[0].key);
+  const selected = PROJECT_FOLDERS.find((f) => f.key === selectedKey) ?? PROJECT_FOLDERS[0];
+  const children: ProjectFolder[] = selected.children ?? [];
+
+  return (
+    <div className="border-t border-line">
+      <div className="border-b border-line bg-accent-wash px-6 py-4 lg:px-8">
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="text-accent">
+            +
+          </span>
+          <p className="text-[13px] leading-relaxed text-text">{tf.banner}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+        <div className="border-b border-line lg:border-r lg:border-b-0">
+          <header className="border-b border-line px-6 py-4 lg:px-8">
+            <MonoLabel>{tf.foldersLabel}</MonoLabel>
+          </header>
+          <ul>
+            {PROJECT_FOLDERS.map((folder, i) => {
+              const active = folder.key === selectedKey;
+              return (
+                <li key={folder.key}>
+                  <button
+                    onClick={() => setSelectedKey(folder.key)}
+                    aria-current={active ? "true" : undefined}
+                    className={cx(
+                      "flex w-full items-center gap-3 border-b border-line border-l-2 px-6 py-3 text-left text-[13px] transition-colors duration-200 lg:px-8",
+                      active
+                        ? "border-l-accent bg-sunken text-ink"
+                        : "border-l-transparent text-muted hover:bg-surface-hover hover:text-ink",
+                    )}
+                  >
+                    <span aria-hidden className="mono-label shrink-0 text-faint">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="leading-snug">{tf.folders[folder.key] ?? folder.key}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div>
+          <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4 lg:px-8">
+            <MonoLabel>{tf.contentsLabel}</MonoLabel>
+            <span className="text-[14px] text-ink">{tf.folders[selected.key] ?? selected.key}</span>
+          </header>
+
+          {children.length > 0 ? (
+            <ul>
+              {children.map((child) => (
+                <li
+                  key={child.key}
+                  className="flex items-center gap-3 border-b border-line px-6 py-3 text-[13px] text-ink lg:px-8"
+                >
+                  <span aria-hidden className="text-faint">
+                    ▸
+                  </span>
+                  {tf.folders[child.key] ?? child.key}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="px-6 py-16 text-center lg:px-8">
+              <MonoLabel className="mb-3">{tf.emptyTitle}</MonoLabel>
+              <p className="mx-auto max-w-sm text-[14px] leading-relaxed text-muted">{tf.emptyDescription}</p>
+              <p className="mx-auto mt-2 max-w-sm text-[12px] leading-relaxed text-faint">{tf.subfoldersPending}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------- Tabs */
 
 export function ProjectTabs({ project }: { project: Project }) {
@@ -696,6 +780,7 @@ export function ProjectTabs({ project }: { project: Project }) {
         {tab === "vendor" && <Vendor project={project} t={t} />}
         {tab === "benefits" && <Benefits project={project} t={t} />}
         {tab === "experience" && <Experience project={project} t={t} />}
+        {tab === "file" && <Files t={t} />}
       </div>
     </>
   );

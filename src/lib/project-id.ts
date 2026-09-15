@@ -33,10 +33,32 @@ export function nextSequence(existingIds: string[], type: ProjectType, date: Dat
   return used.length === 0 ? 1 : Math.max(...used) + 1;
 }
 
+/**
+ * A project's stored name is composed, not free text: {building}_{descriptor}
+ * _{lead}, e.g. "B5_AMHS Upgrade_Jackie Shao". Only the middle descriptor is
+ * typed by the creator; the building and lead are stamped in so the name is
+ * self-describing wherever it appears without its surrounding record.
+ *
+ * Unlike the project ID this is NOT immutable — it is derived from fields
+ * that can be edited, so recompose it whenever building or lead changes
+ * rather than treating a stored name as the source of truth.
+ */
+export function composeProjectName(parts: {
+  building: string;
+  otherBuildingName?: string;
+  descriptor: string;
+  leadName: string;
+}): string {
+  const building =
+    parts.building === "Others" ? parts.otherBuildingName?.trim() || "" : parts.building.trim();
+  return [building, parts.descriptor.trim(), parts.leadName.trim()].filter(Boolean).join("_");
+}
+
 export interface ProjectDraft {
   building: string;
   otherBuildingName?: string;
   area: string;
+  /** The typed middle segment only — see composeProjectName for the full name. */
   name: string;
   leadId: string;
   type: ProjectType;
@@ -147,7 +169,12 @@ export function buildProject(id: string, draft: ProjectDraft, lead: User): Proje
 
   return {
     id,
-    name: draft.name.trim(),
+    name: composeProjectName({
+      building: draft.building,
+      otherBuildingName: draft.otherBuildingName,
+      descriptor: draft.name,
+      leadName: lead.name,
+    }),
     building: draft.building as Project["building"],
     otherBuildingName: draft.building === "Others" ? draft.otherBuildingName?.trim() : undefined,
     area: draft.area.trim(),

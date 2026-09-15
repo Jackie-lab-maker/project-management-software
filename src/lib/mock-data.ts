@@ -26,7 +26,7 @@ export const eligibleLeads = users.filter(
 export const projects: Project[] = [
   {
     id: "PRJ202609001",
-    name: "Litho Bay AMHS Stocker Retrofit",
+    name: "B2_Litho Bay AMHS Stocker Retrofit_Mei Tan",
     building: "B2",
     area: "Litho Bay 4",
     type: "New Project",
@@ -163,7 +163,7 @@ export const projects: Project[] = [
   },
   {
     id: "CIP202609002",
-    name: "Etch Chamber Clean Cycle Optimization",
+    name: "B1_Etch Chamber Clean Cycle Optimization_Arun Prakash",
     building: "B1",
     area: "Etch Bay 2",
     type: "CIP",
@@ -255,7 +255,7 @@ export const projects: Project[] = [
   },
   {
     id: "PRJ202608004",
-    name: "Metrology Data Pipeline Consolidation",
+    name: "B3_Metrology Data Pipeline Consolidation_Mei Tan",
     building: "B3",
     area: "Metrology Lab",
     type: "New Project",
@@ -325,7 +325,7 @@ export const projects: Project[] = [
   },
   {
     id: "CIP202607003",
-    name: "Cleanroom Gown Room Flow Redesign",
+    name: "B5_Cleanroom Gown Room Flow Redesign_Arun Prakash",
     building: "B5",
     area: "Gown Room East",
     type: "CIP",
@@ -393,7 +393,7 @@ export const projects: Project[] = [
   },
   {
     id: "PRJ202605002",
-    name: "Wet Bench Chemical Delivery Interlock",
+    name: "B1_Wet Bench Chemical Delivery Interlock_Mei Tan",
     building: "B1",
     area: "Wet Bench 3",
     type: "New Project",
@@ -463,7 +463,7 @@ export const projects: Project[] = [
   },
   {
     id: "CIP202604001",
-    name: "Preventive Maintenance Scheduling Bot",
+    name: "B2_Preventive Maintenance Scheduling Bot_Arun Prakash",
     building: "B2",
     area: "Fab-wide",
     type: "CIP",

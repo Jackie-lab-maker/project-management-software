@@ -15,7 +15,7 @@ Frontend prototype — Phase 1 of the spec's delivery sequence. There is **no ba
 | `/` | Home dashboard — your projects, at-risk items, the agent's overnight findings, overdue actions |
 | `/portfolio` | Searchable project list with building/type/stage filters, table / cards / timeline views |
 | `/projects/new` | Create-project form with live ID preview, duplicate detection, and full field validation |
-| `/projects/[id]` | Project workspace — the full KPI dashboard (status, progress, budget, ROI, vendor, risks, issues, benefits), plus delete with confirmation |
+| `/projects/[id]` | Project workspace — the full KPI dashboard (status, progress, budget, ROI, vendor, risks, issues, benefits), the lifecycle file tree, plus delete with confirmation |
 | `/knowledge` | Knowledge hub with category facets and approval-state filtering |
 | `/analytics` | Portfolio-level trends: stage mix, schedule variance, knowledge health |
 | `/admin` | Roles matrix and audit log |
@@ -30,10 +30,11 @@ The Micron wordmark in the sidebar is sourced from a third-party asset, not Micr
 
 ## Spec rules encoded, not faked
 
-- Project IDs (`{prefix}{YYYY}{MM}{sequence}`) increment per prefix/year/month — see [`src/lib/project-id.ts`](src/lib/project-id.ts)
+- Project IDs (`{prefix}{YYYY}{MM}{sequence}`) increment per prefix/year/month and are immutable — see [`src/lib/project-id.ts`](src/lib/project-id.ts)
+- Project names are composed, not free text: `{building}_{name}_{lead}` (e.g. `B5_AMHS Upgrade_Jackie Shao`)
 - Metrics with no data render **"Data unavailable"**, never a fabricated zero — see the `Measure<T>` type in [`src/lib/types.ts`](src/lib/types.ts)
 - Status is conveyed by text and glyph alongside color, never color alone
-- Light / system theme and English / Simplified Chinese language both persist across sessions
+- Light / system theme and language both persist across sessions; Simplified Chinese is the default, English is opt-in
 
 ## Development
 
@@ -67,8 +68,10 @@ src/
     types.ts              domain model
     mock-data.ts           seed data for projects, users, knowledge
     project-store.ts        localStorage-backed project store (create/delete)
-    project-id.ts            ID generation + form validation
+    project-id.ts            ID generation, name composition + form validation
+    project-files.ts         the fixed per-project folder taxonomy
     metrics.ts               derived metrics (progress, health, variance, formatting)
+    i18n/                    UI dictionaries (zh default, en opt-in) + provider
 ```
 
 ## Not yet built

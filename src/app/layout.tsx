@@ -30,8 +30,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // lang matches DEFAULT_LANG in LanguageProvider — the server has no access
+  // to the viewer's stored choice, so this is the default; the provider
+  // corrects it on mount when they have opted into English.
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

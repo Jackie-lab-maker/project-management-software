@@ -8,6 +8,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { eligibleLeads } from "@/lib/mock-data";
 import {
   buildProject,
+  composeProjectName,
   findDuplicate,
   formatProjectId,
   nextSequence,
@@ -107,13 +108,29 @@ export function NewProjectForm() {
     );
   }, [draft.type, projects]);
 
+  // The name a project is stored under is composed, so the preview shows the
+  // whole thing rather than only the segment being typed. Segments not yet
+  // filled in are simply absent — no placeholder text pretending to be a value.
+  const previewName = useMemo(
+    () =>
+      composeProjectName({
+        building: draft.building,
+        otherBuildingName: draft.otherBuildingName,
+        descriptor: draft.name,
+        leadName: eligibleLeads.find((u) => u.id === draft.leadId)?.name ?? "",
+      }),
+    [draft.building, draft.otherBuildingName, draft.name, draft.leadId],
+  );
+
+  // Compared against stored names, which are composed the same way — so two
+  // projects sharing a descriptor but led by different people are not flagged.
   const duplicate = useMemo(() => {
     if (!draft.building || !draft.area.trim() || !draft.name.trim()) return undefined;
     return findDuplicate(
-      draft,
+      { ...draft, name: previewName },
       projects.map((p) => ({ building: buildingLabel(p), area: p.area, name: p.name, stage: p.stage, id: p.id })),
     );
-  }, [draft, projects]);
+  }, [draft, previewName, projects]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +156,7 @@ export function NewProjectForm() {
           <MonoLabel tone="accent">{tp.createdBadge}</MonoLabel>
           <div className="tnum text-[34px] leading-none font-medium tracking-[-0.03em] text-ink">{created}</div>
           <p className="text-[14px] leading-relaxed text-muted">
-            {tp.createdDescription(draft.name, location, draft.area)}
+            {tp.createdDescription(previewName, location, draft.area)}
           </p>
           <div className="flex justify-center gap-2.5">
             <Link
@@ -247,6 +264,7 @@ export function NewProjectForm() {
               required
               requiredLabel={t.common.required}
               error={errors.name && tp.errors[errors.name]}
+              hint={tp.projectNameHint}
             >
               <input
                 id="name"
@@ -390,6 +408,18 @@ export function NewProjectForm() {
             <MonoLabel>{tp.idPreviewLabel}</MonoLabel>
             <div className="tnum text-[26px] leading-none font-medium tracking-[-0.03em] text-ink">{previewId}</div>
             <p className="text-[12px] leading-relaxed text-muted">{tp.idPreviewHint}</p>
+          </div>
+
+          <div className="space-y-4 border-b border-line p-6 lg:p-7">
+            <MonoLabel>{tp.namePreviewLabel}</MonoLabel>
+            {previewName ? (
+              <div className="text-[17px] leading-snug font-medium tracking-[-0.01em] break-words text-ink">
+                {previewName}
+              </div>
+            ) : (
+              <div className="text-[15px] text-faint">{tp.namePreviewEmpty}</div>
+            )}
+            <p className="text-[12px] leading-relaxed text-muted">{tp.namePreviewHint}</p>
           </div>
 
           {duplicate && (

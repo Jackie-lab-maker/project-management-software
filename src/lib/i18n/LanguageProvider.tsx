@@ -5,6 +5,13 @@ import { dictionaries, type Lang, type Translations } from "./translations";
 
 const STORAGE_KEY = "mdb-lang";
 
+/**
+ * Chinese is the default for this deployment; English is opt-in through the
+ * header toggle. Keep this in sync with <html lang> in layout.tsx, which is
+ * what the server renders before any stored choice is known.
+ */
+export const DEFAULT_LANG: Lang = "zh";
+
 interface LanguageContextValue {
   lang: Lang;
   setLang: (lang: Lang) => void;
@@ -15,19 +22,19 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   // Server-rendered output has no access to localStorage, so it — and the
-  // first client render, to avoid a hydration mismatch — is always English.
-  // The effect below swaps to the stored choice immediately after mount,
-  // same tradeoff ThemeToggle makes for colour, just without an anti-FOUC
-  // script: a text-content re-render on mount is a much smaller flash than
-  // a colour flash would be.
-  const [lang, setLangState] = useState<Lang>("en");
+  // first client render, to avoid a hydration mismatch — is always the
+  // default language. The effect below swaps to the stored choice
+  // immediately after mount, same tradeoff ThemeToggle makes for colour,
+  // just without an anti-FOUC script: a text-content re-render on mount is
+  // a much smaller flash than a colour flash would be.
+  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "zh") setLangState("zh");
+      if (stored === "en" || stored === "zh") setLangState(stored);
     } catch {
-      // Private browsing or blocked storage: stays on the English default.
+      // Private browsing or blocked storage: stays on the default.
     }
   }, []);
 

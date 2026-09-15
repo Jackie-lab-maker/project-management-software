@@ -17,7 +17,8 @@ export type Lang = "en" | "zh";
  * actor/target/timestamp values) is intentionally left in English: in a real
  * deployment that content comes from a database in whatever language it was
  * entered, the same way this app doesn't retranslate a project called
- * "Litho Bay AMHS Stocker Retrofit" any more than a production system would.
+ * "B2_Litho Bay AMHS Stocker Retrofit_Mei Tan" any more than a production
+ * system would.
  *
  * Dates, numbers and currency stay in en-US/UTC formatting regardless of
  * language — the spec calls for "a shared reporting date/time zone" (§4),
@@ -164,6 +165,10 @@ export interface Translations {
     vendorHint: string;
     idPreviewLabel: string;
     idPreviewHint: string;
+    projectNameHint: string;
+    namePreviewLabel: string;
+    namePreviewHint: string;
+    namePreviewEmpty: string;
     duplicateBadge: string;
     duplicateDescription: string;
     duplicateAcknowledge: string;
@@ -211,6 +216,7 @@ export interface Translations {
       vendor: string;
       benefits: string;
       experience: string;
+      file: string;
     };
     tabsAria: string;
     kpi: {
@@ -326,6 +332,15 @@ export interface Translations {
       countermeasure: string;
       reusableArtifacts: string;
       notCaptured: string;
+    };
+    files: {
+      banner: string;
+      foldersLabel: string;
+      contentsLabel: string;
+      emptyTitle: string;
+      emptyDescription: string;
+      subfoldersPending: string;
+      folders: Record<string, string>;
     };
   };
   knowledge: {
@@ -569,16 +584,21 @@ export const en: Translations = {
     selectBuildingPlaceholder: "Select a building…",
     otherBuildingPlaceholder: "e.g. Central Utility Building",
     areaPlaceholder: "e.g. Litho Bay 4",
-    projectNamePlaceholder: "e.g. Litho Bay AMHS Stocker Retrofit",
+    projectNamePlaceholder: "e.g. AMHS Upgrade",
     selectLeadPlaceholder: "Select a lead…",
     vendorNamePlaceholder: "e.g. Daifuku Automation",
     typeHint: "Determines the ID prefix: PRJ for new projects, CIP for continuous improvement.",
     leadHint: "Only users holding Project Lead or System Admin can be assigned.",
     budgetHint: "Currency-aware. Can be added later.",
     vendorHint: "Contact, scope and attachments can be added in the workspace.",
+    projectNameHint: "Describe the work only. The building and lead are added automatically.",
     idPreviewLabel: "Generated ID · preview",
     idPreviewHint:
       "Format {prefix}{YYYY}{MM}{sequence}. The final sequence is assigned by a transactional counter at creation, so concurrent creates cannot collide.",
+    namePreviewLabel: "Generated name · preview",
+    namePreviewHint:
+      "Format {building}_{name}_{lead}. Unlike the ID this is derived, so it is recomposed if the building or lead is changed later.",
+    namePreviewEmpty: "Fill in building, name and lead.",
     duplicateBadge: "Possible duplicate",
     duplicateDescription: "An active project already exists with the same building, area and name.",
     duplicateAcknowledge: "Create it anyway — I have confirmed this is a separate project.",
@@ -628,6 +648,7 @@ export const en: Translations = {
       vendor: "Vendor",
       benefits: "Benefits",
       experience: "Experience",
+      file: "File",
     },
     tabsAria: "Project sections",
     kpi: {
@@ -750,6 +771,25 @@ export const en: Translations = {
       countermeasure: "Countermeasure and recommendation",
       reusableArtifacts: "Reusable artifacts and evidence",
       notCaptured: "Not yet captured.",
+    },
+    files: {
+      banner:
+        "The folder structure is fixed across every project so a document's place in the tree records which phase produced it. Upload, versioning and retention arrive with the storage backend.",
+      foldersLabel: "Folders",
+      contentsLabel: "Contents",
+      emptyTitle: "Empty",
+      emptyDescription: "No documents have been filed here yet.",
+      subfoldersPending: "Subfolders for this stage are not yet defined.",
+      folders: {
+        initial: "Project initial",
+        designing: "Project designing",
+        implementation: "Project implement & release production",
+        close: "Project close",
+        cip: "Project CIP & improvement",
+        afterSales: "After sales services",
+        commercial: "Commercial documents",
+        statusUpdate: "Project status update",
+      },
     },
   },
   knowledge: {
@@ -1058,15 +1098,19 @@ export const zh: Translations = {
     selectBuildingPlaceholder: "请选择厂房…",
     otherBuildingPlaceholder: "例如：中央动力站",
     areaPlaceholder: "例如：光刻区 4",
-    projectNamePlaceholder: "例如：光刻区 AMHS 自动化立库改造",
+    projectNamePlaceholder: "例如：AMHS 自动化立库改造",
     selectLeadPlaceholder: "请选择负责人…",
     vendorNamePlaceholder: "例如：大福（Daifuku）",
     typeHint: "决定编号前缀：新建项目为 PRJ，持续改进项目为 CIP。",
     leadHint: "仅可指定具有项目负责人或系统管理员角色的用户。",
     budgetHint: "支持多币种，可稍后补充。",
     vendorHint: "联系方式、范围和附件可在项目工作区中补充。",
+    projectNameHint: "仅需描述工作内容，厂房与负责人会自动添加。",
     idPreviewLabel: "生成编号 · 预览",
     idPreviewHint: "格式为 {prefix}{YYYY}{MM}{sequence}。最终序号由创建时的事务性计数器分配，因此并发创建不会冲突。",
+    namePreviewLabel: "生成名称 · 预览",
+    namePreviewHint: "格式为 {厂房}_{名称}_{负责人}。与编号不同，该名称是派生的，若日后修改厂房或负责人会重新生成。",
+    namePreviewEmpty: "请填写厂房、名称和负责人。",
     duplicateBadge: "可能重复",
     duplicateDescription: "已存在相同厂房、区域和名称的在建项目。",
     duplicateAcknowledge: "仍要创建 — 我已确认这是一个独立的项目。",
@@ -1114,6 +1158,7 @@ export const zh: Translations = {
       vendor: "供应商",
       benefits: "效益",
       experience: "经验总结",
+      file: "文件",
     },
     tabsAria: "项目分区",
     kpi: {
@@ -1229,6 +1274,25 @@ export const zh: Translations = {
       countermeasure: "改进措施与建议",
       reusableArtifacts: "可复用成果与证据",
       notCaptured: "尚未记录。",
+    },
+    files: {
+      banner:
+        "文件夹结构在所有项目中保持一致，因此文档在目录中的位置即表明其产生于哪个阶段。上传、版本管理及保留策略将随存储后端一并上线。",
+      foldersLabel: "文件夹",
+      contentsLabel: "内容",
+      emptyTitle: "暂无内容",
+      emptyDescription: "此处尚未归档任何文档。",
+      subfoldersPending: "该阶段的子文件夹尚未定义。",
+      folders: {
+        initial: "项目启动",
+        designing: "项目设计",
+        implementation: "项目实施与量产放行",
+        close: "项目关闭",
+        cip: "项目持续改进",
+        afterSales: "售后服务",
+        commercial: "商务文件",
+        statusUpdate: "项目状态更新",
+      },
     },
   },
   knowledge: {
