@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { PageHeader } from "@/components/shell/AppShell";
 import {
@@ -11,7 +13,7 @@ import {
   toneForHealth,
   toneForSeverity,
 } from "@/components/ui/primitives";
-import { currentUser, knowledge, projects } from "@/lib/mock-data";
+import { currentUser, knowledge } from "@/lib/mock-data";
 import {
   buildingLabel,
   daysUntil,
@@ -19,14 +21,7 @@ import {
   formatTimestamp,
   weightedProgress,
 } from "@/lib/metrics";
-
-const active = projects.filter((p) => p.stage !== "Closed" && p.stage !== "Cancelled");
-const mine = active.filter((p) => p.lead.id === currentUser.id);
-const atRisk = active.filter((p) => p.health === "At Risk" || p.health === "Off Track");
-const overdueIssues = active.flatMap((p) =>
-  p.issues.filter((i) => i.overdue).map((i) => ({ ...i, project: p })),
-);
-const reviewSoon = knowledge.filter((k) => daysUntil(k.reviewDate) < 210);
+import { useProjects } from "@/lib/project-store";
 
 function StatCell({
   index,
@@ -54,6 +49,15 @@ function StatCell({
 }
 
 export default function HomePage() {
+  const projects = useProjects();
+  const active = projects.filter((p) => p.stage !== "Closed" && p.stage !== "Cancelled");
+  const mine = active.filter((p) => p.lead.id === currentUser.id);
+  const atRisk = active.filter((p) => p.health === "At Risk" || p.health === "Off Track");
+  const overdueIssues = active.flatMap((p) =>
+    p.issues.filter((i) => i.overdue).map((i) => ({ ...i, project: p })),
+  );
+  const reviewSoon = knowledge.filter((k) => daysUntil(k.reviewDate) < 210);
+
   return (
     <>
       <PageHeader

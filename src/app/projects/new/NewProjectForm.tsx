@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button, MonoLabel, StatusBadge, cx } from "@/components/ui/primitives";
-import { eligibleLeads, projects } from "@/lib/mock-data";
+import { eligibleLeads } from "@/lib/mock-data";
 import {
+  buildProject,
   findDuplicate,
   formatProjectId,
   nextSequence,
@@ -13,9 +14,11 @@ import {
   type ProjectDraft,
 } from "@/lib/project-id";
 import { buildingLabel } from "@/lib/metrics";
+import { addCreatedProject, useProjects } from "@/lib/project-store";
 import type { ProjectType } from "@/lib/types";
 
 const BUILDINGS = ["B1", "B2", "B3", "B5", "Others"] as const;
+const CURRENCIES = ["USD", "SGD", "JPY", "EUR"] as const;
 
 const EMPTY: ProjectDraft = {
   building: "",
@@ -26,6 +29,9 @@ const EMPTY: ProjectDraft = {
   type: "New Project",
   startDate: "",
   targetFinishDate: "",
+  budgetAmount: "",
+  budgetCurrency: "USD",
+  vendorName: "",
 };
 
 function Field({
@@ -72,6 +78,7 @@ const inputClass = (invalid?: boolean) =>
   );
 
 export function NewProjectForm() {
+  const projects = useProjects();
   const [draft, setDraft] = useState<ProjectDraft>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -92,7 +99,7 @@ export function NewProjectForm() {
       now,
       nextSequence(projects.map((p) => p.id), draft.type, now),
     );
-  }, [draft.type]);
+  }, [draft.type, projects]);
 
   const duplicate = useMemo(() => {
     if (!draft.building || !draft.area.trim() || !draft.name.trim()) return undefined;
@@ -100,7 +107,7 @@ export function NewProjectForm() {
       draft,
       projects.map((p) => ({ building: buildingLabel(p), area: p.area, name: p.name, stage: p.stage, id: p.id })),
     );
-  }, [draft]);
+  }, [draft, projects]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +116,12 @@ export function NewProjectForm() {
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     if (duplicate && !duplicateAcknowledged) return;
+
+    const lead = eligibleLeads.find((u) => u.id === draft.leadId);
+    if (!lead) return; // unreachable: validateDraft already checked leadId
+
+    const project = buildProject(previewId, draft, lead);
+    addCreatedProject(project);
     setCreated(previewId);
   };
 
@@ -304,19 +317,33 @@ export function NewProjectForm() {
               <div className="flex">
                 <select
                   aria-label="Currency"
+                  value={draft.budgetCurrency}
+                  onChange={(e) => set("budgetCurrency", e.target.value)}
                   className="border border-line bg-bg px-2.5 py-2 text-sm text-text focus:border-ink focus:outline-none"
-                  defaultValue="USD"
                 >
-                  {["USD", "SGD", "JPY", "EUR"].map((c) => (
+                  {CURRENCIES.map((c) => (
                     <option key={c}>{c}</option>
                   ))}
                 </select>
-                <input id="budget" inputMode="decimal" placeholder="0" className={cx(inputClass(), "-ml-px tnum")} />
+                <input
+                  id="budget"
+                  inputMode="decimal"
+                  value={draft.budgetAmount}
+                  onChange={(e) => set("budgetAmount", e.target.value.replace(/[^\d.]/g, ""))}
+                  placeholder="0"
+                  className={cx(inputClass(), "-ml-px tnum")}
+                />
               </div>
             </Field>
 
             <Field label="Vendor name" htmlFor="vendor" hint="Contact, scope and attachments can be added in the workspace.">
-              <input id="vendor" className={inputClass()} placeholder="e.g. Daifuku Automation" />
+              <input
+                id="vendor"
+                value={draft.vendorName}
+                onChange={(e) => set("vendorName", e.target.value)}
+                className={inputClass()}
+                placeholder="e.g. Daifuku Automation"
+              />
             </Field>
           </div>
         </fieldset>

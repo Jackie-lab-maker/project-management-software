@@ -1,4 +1,4 @@
-import type { ProjectType } from "./types";
+import { unavailable, type Project, type ProjectType, type User } from "./types";
 
 const PREFIX: Record<ProjectType, string> = {
   "New Project": "PRJ",
@@ -42,6 +42,9 @@ export interface ProjectDraft {
   type: ProjectType;
   startDate: string;
   targetFinishDate: string;
+  budgetAmount: string;
+  budgetCurrency: string;
+  vendorName: string;
 }
 
 export type FieldErrors = Partial<Record<keyof ProjectDraft, string>>;
@@ -93,4 +96,99 @@ export function findDuplicate<T extends { building: string; area: string; name: 
       norm(p.area) === norm(draft.area) &&
       norm(p.name) === norm(draft.name),
   );
+}
+
+/** A flat planned-vs-actual series spanning start→target, actual not yet begun. */
+function initialProgressSeries(startDate: string, targetFinishDate: string) {
+  const start = new Date(startDate);
+  const end = new Date(targetFinishDate);
+  const months =
+    (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+  const steps = Math.max(months, 1);
+  const points = Math.min(steps + 1, 6);
+
+  return Array.from({ length: points }, (_, i) => {
+    const cursor = new Date(start);
+    cursor.setMonth(start.getMonth() + Math.round((i / (points - 1 || 1)) * steps));
+    return {
+      label: cursor.toLocaleDateString("en-US", { month: "short" }),
+      planned: Math.round((i / (points - 1 || 1)) * 100),
+      actual: i === 0 ? 0 : null,
+    };
+  });
+}
+
+/**
+ * Builds a full Project record from a validated draft, immutable ID, and
+ * resolved lead. Fields the create form does not collect (risks, milestones,
+ * benefits, AI usage, ...) start empty or "unavailable" rather than zero —
+ * there is nothing to report yet, which is different from having measured a
+ * zero.
+ */
+export function buildProject(id: string, draft: ProjectDraft, lead: User): Project {
+  const budgetApproved = Number.parseFloat(draft.budgetAmount);
+  const approved = Number.isFinite(budgetApproved) ? budgetApproved : 0;
+
+  return {
+    id,
+    name: draft.name.trim(),
+    building: draft.building as Project["building"],
+    otherBuildingName: draft.building === "Others" ? draft.otherBuildingName?.trim() : undefined,
+    area: draft.area.trim(),
+    type: draft.type,
+    lead,
+    stage: "Draft",
+    health: "On Track",
+    startDate: draft.startDate,
+    targetFinishDate: draft.targetFinishDate,
+    lastUpdated: new Date().toISOString(),
+    budget: {
+      currency: draft.budgetCurrency,
+      approved,
+      committed: 0,
+      actual: 0,
+      forecastAtCompletion: approved,
+    },
+    roi: {
+      expectedPct: unavailable("Benefit model not yet defined."),
+      realizedPct: unavailable("Project has not reached measurement stage."),
+      paybackMonths: unavailable("Benefit model not yet defined."),
+      assumptions: "Not yet defined.",
+    },
+    vendor: draft.vendorName.trim()
+      ? {
+          name: draft.vendorName.trim(),
+          health: "On Track",
+          contact: "Not yet provided.",
+          milestonesComplete: 0,
+          milestonesTotal: 0,
+          delivery: 0,
+          quality: 0,
+          responsiveness: 0,
+          openActions: 0,
+          lastUpdate: new Date().toISOString().slice(0, 10),
+        }
+      : undefined,
+    risks: [],
+    issues: [],
+    milestones: [],
+    benefit: {
+      plannedFte: unavailable("Benefit model not yet defined."),
+      validatedFte: unavailable("Benefit model not yet defined."),
+      realizedFte: unavailable("Project has not reached measurement stage."),
+      plannedKwh: unavailable("Benefit model not yet defined."),
+      validatedKwh: unavailable("Benefit model not yet defined."),
+      realizedKwh: unavailable("Project has not reached measurement stage."),
+      measurementPeriod: "Not yet defined.",
+    },
+    ai: {
+      activeUsers: 0,
+      prompts: 0,
+      citedSearches: 0,
+      draftsProposed: 0,
+      actionsConfirmed: 0,
+      estimatedHoursSaved: 0,
+    },
+    progressSeries: initialProgressSeries(draft.startDate, draft.targetFinishDate),
+  };
 }

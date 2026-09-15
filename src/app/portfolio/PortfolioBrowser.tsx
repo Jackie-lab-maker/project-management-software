@@ -17,6 +17,7 @@ import {
   scheduleVariance,
   weightedProgress,
 } from "@/lib/metrics";
+import { useProjects } from "@/lib/project-store";
 import type { Project, Stage } from "@/lib/types";
 
 const STAGES: Stage[] = [
@@ -89,7 +90,8 @@ function ProgressTrack({ project }: { project: Project }) {
   );
 }
 
-export function PortfolioBrowser({ projects }: { projects: Project[] }) {
+export function PortfolioBrowser() {
+  const projects = useProjects();
   const [query, setQuery] = useState("");
   const [building, setBuilding] = useState("");
   const [type, setType] = useState("");
