@@ -17,35 +17,54 @@ import type { Project } from "./types";
  */
 
 const STORAGE_KEY = "mdb-created-projects";
+// Seed projects are a static import, not a database row, so "delete" can't
+// remove them — a tombstone list is the only way to make deletion stick for
+// both seed and locally-created projects alike.
+const DELETED_KEY = "mdb-deleted-project-ids";
 
 type Listener = () => void;
 let listeners: Listener[] = [];
 let cache: Project[] | null = null;
 
-function readCreated(): Project[] {
-  if (typeof window === "undefined") return [];
+function readJSON<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return fallback;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Project[]) : [];
+    return parsed ?? fallback;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
-function writeCreated(list: Project[]) {
+function writeJSON(key: string, value: unknown) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Private browsing, blocked storage, or quota exceeded: the project still
-    // renders for the rest of this session via the in-memory cache, it just
+    // Private browsing, blocked storage, or quota exceeded: the change still
+    // applies for the rest of this session via the in-memory cache, it just
     // won't survive a reload.
   }
 }
 
+function readCreated(): Project[] {
+  const list = readJSON<Project[]>(STORAGE_KEY, []);
+  return Array.isArray(list) ? list : [];
+}
+
+function readDeletedIds(): string[] {
+  const list = readJSON<string[]>(DELETED_KEY, []);
+  return Array.isArray(list) ? list : [];
+}
+
+function computeSnapshot(): Project[] {
+  const deleted = new Set(readDeletedIds());
+  return [...seedProjects, ...readCreated()].filter((p) => !deleted.has(p.id));
+}
+
 function getSnapshot(): Project[] {
-  if (cache === null) cache = [...seedProjects, ...readCreated()];
+  if (cache === null) cache = computeSnapshot();
   return cache;
 }
 
@@ -63,7 +82,7 @@ function emit() {
 function subscribe(listener: Listener): () => void {
   listeners.push(listener);
   const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) {
+    if (e.key === STORAGE_KEY || e.key === DELETED_KEY) {
       cache = null;
       listener();
     }
@@ -79,8 +98,27 @@ function subscribe(listener: Listener): () => void {
 export function addCreatedProject(project: Project) {
   const created = readCreated();
   created.push(project);
-  writeCreated(created);
-  cache = [...seedProjects, ...created];
+  writeJSON(STORAGE_KEY, created);
+  cache = null;
+  emit();
+}
+
+/**
+ * Removes a project from every screen in this browser. For a locally-created
+ * project this also drops it from the created list so storage doesn't grow
+ * unboundedly; a seed project is tombstoned instead, since the seed array
+ * itself can't be edited.
+ */
+export function deleteProject(id: string) {
+  const created = readCreated();
+  const stillCreated = created.filter((p) => p.id !== id);
+  if (stillCreated.length !== created.length) {
+    writeJSON(STORAGE_KEY, stillCreated);
+  } else {
+    const deleted = readDeletedIds();
+    if (!deleted.includes(id)) writeJSON(DELETED_KEY, [...deleted, id]);
+  }
+  cache = null;
   emit();
 }
 

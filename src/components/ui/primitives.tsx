@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import { forwardRef, type ComponentProps, type ReactNode } from "react";
 
 export const cx = (...parts: (string | false | null | undefined)[]) =>
   parts.filter(Boolean).join(" ");
@@ -46,13 +46,12 @@ const buttonVariants: Record<ButtonVariant, string> = {
   danger: "border border-risk/40 text-risk hover:bg-risk-wash",
 };
 
-export function Button({
-  variant = "primary",
-  className,
-  ...props
-}: ComponentProps<"button"> & { variant?: ButtonVariant }) {
-  return <button className={cx(buttonBase, buttonVariants[variant], className)} {...props} />;
-}
+export const Button = forwardRef<
+  HTMLButtonElement,
+  ComponentProps<"button"> & { variant?: ButtonVariant }
+>(function Button({ variant = "primary", className, ...props }, ref) {
+  return <button ref={ref} className={cx(buttonBase, buttonVariants[variant], className)} {...props} />;
+});
 
 export function ButtonLink({
   variant = "primary",

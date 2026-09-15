@@ -1,15 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/shell/AppShell";
-import { MonoLabel, StatusBadge, toneForHealth } from "@/components/ui/primitives";
+import { Button, MonoLabel, StatusBadge, toneForHealth } from "@/components/ui/primitives";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { buildingLabel, formatDate, formatTimestamp } from "@/lib/metrics";
-import { useProject } from "@/lib/project-store";
+import { deleteProject, useProject } from "@/lib/project-store";
 import { ProjectTabs } from "./ProjectTabs";
 
 export function ProjectWorkspace({ id }: { id: string }) {
+  const router = useRouter();
   const project = useProject(id);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // A project created client-side (stored in localStorage) is absent from
   // the server-rendered snapshot, so the very first client render would
@@ -18,8 +23,23 @@ export function ProjectWorkspace({ id }: { id: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  const handleDelete = () => {
+    setConfirmOpen(false);
+    setDeleting(true);
+    deleteProject(id);
+    router.push("/portfolio");
+  };
+
   if (!project) {
     if (!mounted) return null;
+    if (deleting) {
+      return (
+        <div className="px-5 py-20 text-center lg:px-8">
+          <MonoLabel className="mb-3">Project deleted</MonoLabel>
+          <p className="mx-auto max-w-md text-[15px] text-muted">Returning to the portfolio…</p>
+        </div>
+      );
+    }
     return (
       <div className="px-5 py-20 text-center lg:px-8">
         <MonoLabel className="mb-3">Not found</MonoLabel>
@@ -41,7 +61,14 @@ export function ProjectWorkspace({ id }: { id: string }) {
       <PageHeader
         label={`${project.type} · ${project.id}`}
         title={project.name}
-        actions={<StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>}
+        actions={
+          <>
+            <StatusBadge tone={toneForHealth(project.health)}>{project.health}</StatusBadge>
+            <Button variant="danger" onClick={() => setConfirmOpen(true)}>
+              Delete project
+            </Button>
+          </>
+        }
         meta={
           <dl className="flex flex-wrap gap-x-10 gap-y-4">
             {[
@@ -64,6 +91,16 @@ export function ProjectWorkspace({ id }: { id: string }) {
         }
       />
       <ProjectTabs project={project} />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        label="Delete project"
+        title={`Delete ${project.id}?`}
+        description={`This removes "${project.name}" and its risks, issues, milestones and benefit data from your view in this browser. This cannot be undone.`}
+        confirmLabel="Delete project"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </>
   );
 }
