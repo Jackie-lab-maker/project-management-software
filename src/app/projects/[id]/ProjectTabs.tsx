@@ -705,6 +705,11 @@ function Files({ t }: { t: Translations }) {
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="leading-snug">{tf.folders[folder.key] ?? folder.key}</span>
+                    {folder.children && folder.children.length > 0 && (
+                      <span className="tnum ml-auto shrink-0 text-[12px] text-faint">
+                        {folder.children.length}
+                      </span>
+                    )}
                   </button>
                 </li>
               );

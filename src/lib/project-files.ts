@@ -7,8 +7,10 @@
  * translations.ts (project.files.folders) so the tree reads in the viewer's
  * language while the key stays stable as a storage path segment.
  *
- * Subfolders attach as `children` — the renderer already walks them, so
- * deepening the tree is a change to this file alone.
+ * Keys are unique among siblings, not globally — "meetingMinutes" and
+ * "others" recur under several phases and deliberately share one label.
+ * A stored path is the chain of keys (initial/meetingMinutes), which stays
+ * distinct even where the leaf key repeats.
  */
 export interface ProjectFolder {
   key: string;
@@ -16,12 +18,48 @@ export interface ProjectFolder {
 }
 
 export const PROJECT_FOLDERS: ProjectFolder[] = [
-  { key: "initial" },
-  { key: "designing" },
-  { key: "implementation" },
-  { key: "close" },
-  { key: "cip" },
-  { key: "afterSales" },
-  { key: "commercial" },
+  {
+    key: "initial",
+    children: [
+      { key: "background" },
+      { key: "benefitRoi" },
+      { key: "reviewApproval" },
+      { key: "vendorEvaluation" },
+      { key: "meetingMinutes" },
+      { key: "others" },
+    ],
+  },
+  {
+    key: "designing",
+    children: [{ key: "requirement" }, { key: "design" }, { key: "meetingMinutes" }],
+  },
+  {
+    key: "implementation",
+    children: [
+      { key: "schedule" },
+      { key: "fac" },
+      { key: "dispatchReceiving" },
+      { key: "setupInstallation" },
+      { key: "commissioning" },
+      { key: "uatSac" },
+      { key: "ccb" },
+      { key: "tryRunRelease" },
+      { key: "ra" },
+      { key: "meetingMinutes" },
+      { key: "others" },
+    ],
+  },
+  {
+    key: "close",
+    children: [
+      { key: "handover" },
+      { key: "photoVideo" },
+      { key: "closeMeeting" },
+      { key: "meetingMinutes" },
+    ],
+  },
+  { key: "cip", children: [{ key: "projectLink" }] },
+  { key: "afterSales", children: [{ key: "sowQuotationPo" }, { key: "issueSolution" }] },
+  { key: "commercial", children: [{ key: "nda" }, { key: "poRecord" }, { key: "invoice" }] },
   { key: "statusUpdate" },
 ];
