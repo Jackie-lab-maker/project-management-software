@@ -1,6 +1,6 @@
 # Automation Digital Brain
 
-An operational source of truth for Micron's Automation Department: project execution, controlled engineering knowledge, and an AI assistant (**Jason**) in one governed home, built against an internal build specification (not included in this repo).
+An operational source of truth software: project execution, controlled engineering knowledge, and an AI assistant (**Jason**) in one governed home, built against an internal build specification (not included in this repo).
 
 **Live:** [project-management-software-ruby.vercel.app](https://project-management-software-ruby.vercel.app)
 
