@@ -183,7 +183,7 @@ export function StatusBadge({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-[2px] px-2 py-1 font-mono text-[10px] tracking-[0.1em] uppercase",
+        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[2px] px-2 py-1 font-mono text-[10px] tracking-[0.1em] uppercase",
         statusStyle[tone],
         className,
       )}
