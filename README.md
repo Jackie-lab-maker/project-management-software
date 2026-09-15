@@ -33,7 +33,7 @@ The Micron wordmark in the sidebar is sourced from a third-party asset, not Micr
 - Project IDs (`{prefix}{YYYY}{MM}{sequence}`) increment per prefix/year/month — see [`src/lib/project-id.ts`](src/lib/project-id.ts)
 - Metrics with no data render **"Data unavailable"**, never a fabricated zero — see the `Measure<T>` type in [`src/lib/types.ts`](src/lib/types.ts)
 - Status is conveyed by text and glyph alongside color, never color alone
-- Light / dark / system themes persist across sessions
+- Light / system theme and English / Simplified Chinese language both persist across sessions
 
 ## Development
 
