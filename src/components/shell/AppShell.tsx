@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import { currentUser } from "@/lib/mock-data";
 import { MonoLabel, cx } from "@/components/ui/primitives";
 import { JasonPanel } from "./JasonPanel";
+import { MicronLogo } from "./MicronLogo";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
@@ -18,14 +19,14 @@ const NAV = [
 
 function Wordmark() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-70">
-      {/* Placeholder mark. Replace with the approved Micron logo asset before release (spec §7). */}
-      <span aria-hidden className="flex size-6 items-center justify-center border border-ink">
-        <span className="size-2 bg-accent" />
-      </span>
-      <span className="text-[15px] leading-none font-medium tracking-[-0.02em] text-ink">
-        Digital Brain
-      </span>
+    <Link
+      href="/"
+      aria-label="Micron — Automation Digital Brain home"
+      className="inline-flex transition-opacity hover:opacity-70"
+    >
+      {/* Pure black / pure white rather than the near-black text token: those are
+          the two variants the mark is published in, so it is never tinted. */}
+      <MicronLogo className="h-[22px] w-auto text-black dark:text-white" />
     </Link>
   );
 }
