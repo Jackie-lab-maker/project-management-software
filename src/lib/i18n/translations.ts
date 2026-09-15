@@ -53,6 +53,8 @@ export interface Translations {
     searchAria: string;
     searchPlaceholder: string;
     closeAgentPanel: string;
+    openMenu: string;
+    closeMenu: string;
   };
   footer: {
     trademark: string;
@@ -454,7 +456,7 @@ export const en: Translations = {
     primaryLandmark: "Primary",
     micronHome: "Micron — Automation Digital Brain home",
     home: "Home",
-    portfolio: "Portfolio",
+    portfolio: "Projects",
     knowledge: "Knowledge",
     analytics: "Analytics",
     administration: "Administration",
@@ -462,6 +464,8 @@ export const en: Translations = {
     searchAria: "Search projects and knowledge",
     searchPlaceholder: "Search projects, documents…",
     closeAgentPanel: "Close agent panel",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   footer: {
     trademark:
@@ -815,8 +819,6 @@ export const en: Translations = {
       "System Admin": "Configure users, roles, taxonomies, retention, integrations, and all records.",
       "Project Lead": "Create and manage assigned projects, milestones, team, documents, reports, and agent actions.",
       Engineer: "Contribute to assigned projects; upload, revise and search permitted knowledge; submit lessons learned.",
-      Technician: "View assigned project information; update assigned tasks; upload field evidence when permitted.",
-      Manager: "Portfolio visibility, approvals, reporting, and controlled access within their organization.",
       Visitor: "Read-only access to specifically shared, approved content.",
     },
     auditActions: [
@@ -906,8 +908,6 @@ export const en: Translations = {
       "System Admin": "System Admin",
       "Project Lead": "Project Lead",
       Engineer: "Engineer",
-      Technician: "Technician",
-      Manager: "Manager",
       Visitor: "Visitor",
     },
     mitigationStatus: {
@@ -948,7 +948,7 @@ export const zh: Translations = {
     primaryLandmark: "主导航",
     micronHome: "美光 — 自动化数字大脑首页",
     home: "首页",
-    portfolio: "项目组合",
+    portfolio: "项目",
     knowledge: "知识库",
     analytics: "分析",
     administration: "管理",
@@ -956,6 +956,8 @@ export const zh: Translations = {
     searchAria: "搜索项目和知识",
     searchPlaceholder: "搜索项目、文档…",
     closeAgentPanel: "关闭智能体面板",
+    openMenu: "打开菜单",
+    closeMenu: "关闭菜单",
   },
   footer: {
     trademark: "Micron™ 及美光轨道标志是美光科技公司（Micron Technology, Inc.）的商标 · 仅限内部使用 · 正式发布前请与美光法务及品牌部门确认最终文案。",
@@ -1293,8 +1295,6 @@ export const zh: Translations = {
       "System Admin": "配置用户、角色、分类体系、保留策略、集成及全部记录。",
       "Project Lead": "创建并管理所负责的项目、里程碑、团队、文档、报告及智能体操作。",
       Engineer: "参与所分配的项目；上传、修订及搜索权限范围内的知识内容；提交经验总结。",
-      Technician: "查看所分配的项目信息；更新所分配的任务；在获授权时上传现场证据。",
-      Manager: "在所属组织范围内拥有项目组合可见性、审批权限及报表访问权限，并可进行受控访问。",
       Visitor: "仅可只读访问特定共享的已批准内容。",
     },
     auditActions: [
@@ -1384,8 +1384,6 @@ export const zh: Translations = {
       "System Admin": "系统管理员",
       "Project Lead": "项目负责人",
       Engineer: "工程师",
-      Technician: "技术员",
-      Manager: "经理",
       Visitor: "访客",
     },
     mitigationStatus: {

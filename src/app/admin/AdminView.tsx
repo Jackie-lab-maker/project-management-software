@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { users } from "@/lib/mock-data";
 import type { Role } from "@/lib/types";
 
-const ROLES: Role[] = ["System Admin", "Project Lead", "Engineer", "Technician", "Manager", "Visitor"];
+const ROLES: Role[] = ["System Admin", "Project Lead", "Engineer", "Visitor"];
 
 // actor/target/at are audit-log data (who, what, when) and stay as recorded;
 // action and outcome are UI copy describing them, translated via t.admin.

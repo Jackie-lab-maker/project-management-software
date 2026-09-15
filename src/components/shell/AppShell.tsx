@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { currentUser } from "@/lib/mock-data";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MonoLabel, cx } from "@/components/ui/primitives";
@@ -31,6 +31,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { t } = useLanguage();
   const [agentOpen, setAgentOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const NAV = [
     { href: "/", label: t.nav.home, glyph: "◧" },
@@ -40,16 +41,46 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/admin", label: t.nav.administration, glyph: "⚙" },
   ];
 
+  // Below lg the sidebar is off-canvas, so the route it would otherwise be
+  // reachable from — the persistent left nav — is gone unless this closes
+  // itself on navigation and on Escape, same as ConfirmDialog.
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileNavOpen]);
+
   return (
     <div className="min-h-dvh bg-bg">
       <div className="flex min-h-dvh">
-        {/* Sidebar */}
+        {/* Sidebar. Fixed + off-canvas (translate-x) below lg, where it opens
+            as a drawer over a backdrop; in-flow and always visible at lg+ —
+            the lg: classes below win at that breakpoint regardless of
+            mobileNavOpen, so desktop is unaffected by the drawer state. */}
         <nav
           aria-label={t.nav.primaryLandmark}
-          className="sticky top-0 hidden h-dvh w-[216px] shrink-0 flex-col border-r border-line bg-surface lg:flex"
+          className={cx(
+            "fixed inset-y-0 left-0 z-40 flex w-[260px] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-surface transition-transform duration-200 ease-out",
+            "lg:sticky lg:top-0 lg:h-dvh lg:w-[216px] lg:shrink-0 lg:translate-x-0",
+            mobileNavOpen ? "translate-x-0" : "-translate-x-full",
+          )}
         >
-          <div className="border-b border-line px-5 py-4">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
             <Wordmark />
+            <button
+              onClick={() => setMobileNavOpen(false)}
+              aria-label={t.nav.closeMenu}
+              className="flex size-7 items-center justify-center border border-line text-muted transition-colors hover:border-ink hover:text-ink lg:hidden"
+            >
+              <span aria-hidden>✕</span>
+            </button>
           </div>
 
           <ul className="flex-1 py-2">
@@ -94,6 +125,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </nav>
 
+        {mobileNavOpen && (
+          <div
+            aria-hidden
+            onClick={() => setMobileNavOpen(false)}
+            className="fixed inset-0 z-[35] bg-ink/50 lg:hidden"
+          />
+        )}
+
         {/* Main column */}
         {/* Padding compensation must start at the same breakpoint as the
             fixed agent panel itself (no breakpoint — always on lg+ screens
@@ -104,6 +143,22 @@ export function AppShell({ children }: { children: ReactNode }) {
             agent toggle button — unclickable in that range. */}
         <div className={cx("flex min-w-0 flex-1 flex-col transition-[padding] duration-200", agentOpen && "lg:pr-[380px]")}>
           <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-line bg-surface/92 px-5 py-3 backdrop-blur-sm lg:px-8">
+            <button
+              onClick={() => {
+                setMobileNavOpen((v) => !v);
+                setAgentOpen(false);
+              }}
+              aria-expanded={mobileNavOpen}
+              aria-label={t.nav.openMenu}
+              className="flex size-7 items-center justify-center border border-line text-ink transition-colors hover:border-ink hover:bg-surface-hover lg:hidden"
+            >
+              <span aria-hidden className="flex flex-col items-center gap-[3px]">
+                <span className="h-px w-3.5 bg-current" />
+                <span className="h-px w-3.5 bg-current" />
+                <span className="h-px w-3.5 bg-current" />
+              </span>
+            </button>
+
             <div className="lg:hidden">
               <Wordmark />
             </div>
@@ -121,7 +176,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <LanguageToggle />
               <ThemeToggle />
               <button
-                onClick={() => setAgentOpen((v) => !v)}
+                onClick={() => {
+                  setAgentOpen((v) => !v);
+                  setMobileNavOpen(false);
+                }}
                 aria-expanded={agentOpen}
                 className={cx(
                   "flex items-center gap-2 border px-3 py-1.5 text-[13px] transition-colors duration-200",

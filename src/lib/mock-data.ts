@@ -10,10 +10,10 @@ import {
 export const users: User[] = [
   { id: "u1", name: "Mei Tan", initials: "MT", role: "Project Lead", org: "Automation / Litho" },
   { id: "u2", name: "Arun Prakash", initials: "AP", role: "Project Lead", org: "Automation / Etch" },
-  { id: "u3", name: "Dana Reyes", initials: "DR", role: "Manager", org: "Automation" },
+  { id: "u3", name: "Dana Reyes", initials: "DR", role: "Engineer", org: "Automation" },
   { id: "u4", name: "Kenji Watanabe", initials: "KW", role: "Engineer", org: "Automation / Metrology" },
   { id: "u5", name: "Sofia Lindqvist", initials: "SL", role: "Engineer", org: "Automation / Controls" },
-  { id: "u6", name: "Tomas Nowak", initials: "TN", role: "Technician", org: "Automation / Floor" },
+  { id: "u6", name: "Tomas Nowak", initials: "TN", role: "Engineer", org: "Automation / Floor" },
   { id: "u7", name: "Priya Sharma", initials: "PS", role: "System Admin", org: "Automation / IT" },
 ];
 

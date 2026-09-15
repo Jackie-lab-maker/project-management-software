@@ -1,10 +1,4 @@
-export type Role =
-  | "System Admin"
-  | "Project Lead"
-  | "Engineer"
-  | "Technician"
-  | "Manager"
-  | "Visitor";
+export type Role = "System Admin" | "Project Lead" | "Engineer" | "Visitor";
 
 export type Building = "B1" | "B2" | "B3" | "B5" | "Others";
 
