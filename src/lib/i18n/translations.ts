@@ -339,7 +339,6 @@ export interface Translations {
       contentsLabel: string;
       emptyTitle: string;
       emptyDescription: string;
-      subfoldersPending: string;
       folders: Record<string, string>;
     };
   };
@@ -779,7 +778,6 @@ export const en: Translations = {
       contentsLabel: "Contents",
       emptyTitle: "Empty",
       emptyDescription: "No documents have been filed here yet.",
-      subfoldersPending: "Subfolders for this stage are not yet defined.",
       folders: {
         initial: "Project Initial",
         designing: "Project Designing",
@@ -1309,7 +1307,6 @@ export const zh: Translations = {
       contentsLabel: "内容",
       emptyTitle: "暂无内容",
       emptyDescription: "此处尚未归档任何文档。",
-      subfoldersPending: "该阶段的子文件夹尚未定义。",
       folders: {
         initial: "项目启动",
         designing: "项目设计",

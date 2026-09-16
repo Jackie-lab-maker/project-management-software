@@ -34,24 +34,12 @@ export function nextSequence(existingIds: string[], type: ProjectType, date: Dat
 }
 
 /**
- * A project's stored name is composed, not free text: {building}_{descriptor}
- * _{lead}, e.g. "B5_AMHS Upgrade_Jackie Shao". Only the middle descriptor is
- * typed by the creator; the building and lead are stamped in so the name is
- * self-describing wherever it appears without its surrounding record.
- *
- * Unlike the project ID this is NOT immutable — it is derived from fields
- * that can be edited, so recompose it whenever building or lead changes
- * rather than treating a stored name as the source of truth.
+ * "B5_AMHS Upgrade_Jackie Shao". Derived, unlike the immutable ID — recompose
+ * it when the building or lead changes rather than trusting a stored name.
+ * Empty segments drop out so a half-filled form previews cleanly.
  */
-export function composeProjectName(parts: {
-  building: string;
-  otherBuildingName?: string;
-  descriptor: string;
-  leadName: string;
-}): string {
-  const building =
-    parts.building === "Others" ? parts.otherBuildingName?.trim() || "" : parts.building.trim();
-  return [building, parts.descriptor.trim(), parts.leadName.trim()].filter(Boolean).join("_");
+export function composeProjectName(building: string, descriptor: string, leadName: string): string {
+  return [building, descriptor, leadName].map((s) => s.trim()).filter(Boolean).join("_");
 }
 
 export interface ProjectDraft {
@@ -166,17 +154,13 @@ function initialProgressSeries(startDate: string, targetFinishDate: string) {
 export function buildProject(id: string, draft: ProjectDraft, lead: User): Project {
   const budgetApproved = Number.parseFloat(draft.budgetAmount);
   const approved = Number.isFinite(budgetApproved) ? budgetApproved : 0;
+  const otherBuildingName = draft.building === "Others" ? draft.otherBuildingName?.trim() : undefined;
 
   return {
     id,
-    name: composeProjectName({
-      building: draft.building,
-      otherBuildingName: draft.otherBuildingName,
-      descriptor: draft.name,
-      leadName: lead.name,
-    }),
+    name: composeProjectName(otherBuildingName ?? draft.building, draft.name, lead.name),
     building: draft.building as Project["building"],
-    otherBuildingName: draft.building === "Others" ? draft.otherBuildingName?.trim() : undefined,
+    otherBuildingName,
     area: draft.area.trim(),
     type: draft.type,
     lead,

@@ -5,12 +5,8 @@ import { dictionaries, type Lang, type Translations } from "./translations";
 
 const STORAGE_KEY = "mdb-lang";
 
-/**
- * Chinese is the default for this deployment; English is opt-in through the
- * header toggle. Keep this in sync with <html lang> in layout.tsx, which is
- * what the server renders before any stored choice is known.
- */
-export const DEFAULT_LANG: Lang = "zh";
+/** Keep in sync with <html lang> in layout.tsx, which the server renders. */
+const DEFAULT_LANG: Lang = "zh";
 
 interface LanguageContextValue {
   lang: Lang;

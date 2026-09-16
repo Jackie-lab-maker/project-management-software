@@ -1,16 +1,8 @@
 /**
- * The project file taxonomy. The first layer is fixed and identical across
- * every project — it mirrors the project lifecycle, so a document's place in
- * the tree is itself a statement about which phase produced it.
- *
- * Folders are keyed rather than named here: the display name comes from
- * translations.ts (project.files.folders) so the tree reads in the viewer's
- * language while the key stays stable as a storage path segment.
- *
- * Keys are unique among siblings, not globally — "meetingMinutes" and
- * "others" recur under several phases and deliberately share one label.
- * A stored path is the chain of keys (initial/meetingMinutes), which stays
- * distinct even where the leaf key repeats.
+ * Folders are keyed, not named: labels live in translations.ts so the tree
+ * reads in the viewer's language while the key stays stable as a storage path
+ * segment. Keys are unique among siblings, not globally — "meetingMinutes"
+ * recurs under several phases, and a path is the chain of keys.
  */
 export interface ProjectFolder {
   key: string;

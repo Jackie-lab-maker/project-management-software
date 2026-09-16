@@ -26,7 +26,7 @@ import {
   scheduleVariance,
   weightedProgress,
 } from "@/lib/metrics";
-import { PROJECT_FOLDERS, type ProjectFolder } from "@/lib/project-files";
+import { PROJECT_FOLDERS } from "@/lib/project-files";
 import type { Measure, Project } from "@/lib/types";
 
 const TABS = ["overview", "timeline", "risksIssues", "vendor", "benefits", "experience", "file"] as const;
@@ -666,9 +666,7 @@ function Experience({ project, t }: { project: Project; t: Translations }) {
 
 function Files({ t }: { t: Translations }) {
   const tf = t.project.files;
-  const [selectedKey, setSelectedKey] = useState(PROJECT_FOLDERS[0].key);
-  const selected = PROJECT_FOLDERS.find((f) => f.key === selectedKey) ?? PROJECT_FOLDERS[0];
-  const children: ProjectFolder[] = selected.children ?? [];
+  const [selected, setSelected] = useState(PROJECT_FOLDERS[0]);
 
   return (
     <div className="border-t border-line">
@@ -688,11 +686,11 @@ function Files({ t }: { t: Translations }) {
           </header>
           <ul>
             {PROJECT_FOLDERS.map((folder, i) => {
-              const active = folder.key === selectedKey;
+              const active = folder === selected;
               return (
                 <li key={folder.key}>
                   <button
-                    onClick={() => setSelectedKey(folder.key)}
+                    onClick={() => setSelected(folder)}
                     aria-current={active ? "true" : undefined}
                     className={cx(
                       "flex w-full items-center gap-3 border-b border-line border-l-2 px-6 py-3 text-left text-[13px] transition-colors duration-200 lg:px-8",
@@ -705,11 +703,9 @@ function Files({ t }: { t: Translations }) {
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="leading-snug">{tf.folders[folder.key] ?? folder.key}</span>
-                    {folder.children && folder.children.length > 0 && (
-                      <span className="tnum ml-auto shrink-0 text-[12px] text-faint">
-                        {folder.children.length}
-                      </span>
-                    )}
+                    <span className="tnum ml-auto shrink-0 text-[12px] text-faint">
+                      {folder.children?.length}
+                    </span>
                   </button>
                 </li>
               );
@@ -723,9 +719,9 @@ function Files({ t }: { t: Translations }) {
             <span className="text-[14px] text-ink">{tf.folders[selected.key] ?? selected.key}</span>
           </header>
 
-          {children.length > 0 ? (
+          {selected.children ? (
             <ul>
-              {children.map((child) => (
+              {selected.children.map((child) => (
                 <li
                   key={child.key}
                   className="flex items-center gap-3 border-b border-line px-6 py-3 text-[13px] text-ink lg:px-8"
@@ -741,7 +737,6 @@ function Files({ t }: { t: Translations }) {
             <div className="px-6 py-16 text-center lg:px-8">
               <MonoLabel className="mb-3">{tf.emptyTitle}</MonoLabel>
               <p className="mx-auto max-w-sm text-[14px] leading-relaxed text-muted">{tf.emptyDescription}</p>
-              <p className="mx-auto mt-2 max-w-sm text-[12px] leading-relaxed text-faint">{tf.subfoldersPending}</p>
             </div>
           )}
         </div>

@@ -108,18 +108,11 @@ export function NewProjectForm() {
     );
   }, [draft.type, projects]);
 
-  // The name a project is stored under is composed, so the preview shows the
-  // whole thing rather than only the segment being typed. Segments not yet
-  // filled in are simply absent — no placeholder text pretending to be a value.
-  const previewName = useMemo(
-    () =>
-      composeProjectName({
-        building: draft.building,
-        otherBuildingName: draft.otherBuildingName,
-        descriptor: draft.name,
-        leadName: eligibleLeads.find((u) => u.id === draft.leadId)?.name ?? "",
-      }),
-    [draft.building, draft.otherBuildingName, draft.name, draft.leadId],
+  // Previews the whole stored name, not just the segment being typed.
+  const previewName = composeProjectName(
+    draft.building === "Others" ? draft.otherBuildingName ?? "" : draft.building,
+    draft.name,
+    eligibleLeads.find((u) => u.id === draft.leadId)?.name ?? "",
   );
 
   // Compared against stored names, which are composed the same way — so two
