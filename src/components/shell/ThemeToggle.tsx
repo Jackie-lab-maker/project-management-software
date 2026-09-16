@@ -11,7 +11,7 @@ type Theme = "light" | "system";
 
 const GLYPH: Record<Theme, string> = { light: "○", system: "◐" };
 
-export function applyTheme(theme: Theme) {
+function applyTheme(theme: Theme) {
   const root = document.documentElement;
   if (theme === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", theme);

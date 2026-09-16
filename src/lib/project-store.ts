@@ -26,15 +26,14 @@ type Listener = () => void;
 let listeners: Listener[] = [];
 let cache: Project[] | null = null;
 
-function readJSON<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
+function readArray<T>(key: string): T[] {
+  if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw);
-    return parsed ?? fallback;
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "");
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return fallback;
+    // Absent, or corrupted by something other than this module.
+    return [];
   }
 }
 
@@ -48,19 +47,9 @@ function writeJSON(key: string, value: unknown) {
   }
 }
 
-function readCreated(): Project[] {
-  const list = readJSON<Project[]>(STORAGE_KEY, []);
-  return Array.isArray(list) ? list : [];
-}
-
-function readDeletedIds(): string[] {
-  const list = readJSON<string[]>(DELETED_KEY, []);
-  return Array.isArray(list) ? list : [];
-}
-
 function computeSnapshot(): Project[] {
-  const deleted = new Set(readDeletedIds());
-  return [...seedProjects, ...readCreated()].filter((p) => !deleted.has(p.id));
+  const deleted = new Set(readArray<string>(DELETED_KEY));
+  return [...seedProjects, ...readArray<Project>(STORAGE_KEY)].filter((p) => !deleted.has(p.id));
 }
 
 function getSnapshot(): Project[] {
@@ -96,7 +85,7 @@ function subscribe(listener: Listener): () => void {
 
 /** Appends a project created through the New Project form. */
 export function addCreatedProject(project: Project) {
-  const created = readCreated();
+  const created = readArray<Project>(STORAGE_KEY);
   created.push(project);
   writeJSON(STORAGE_KEY, created);
   cache = null;
@@ -110,12 +99,12 @@ export function addCreatedProject(project: Project) {
  * itself can't be edited.
  */
 export function deleteProject(id: string) {
-  const created = readCreated();
+  const created = readArray<Project>(STORAGE_KEY);
   const stillCreated = created.filter((p) => p.id !== id);
   if (stillCreated.length !== created.length) {
     writeJSON(STORAGE_KEY, stillCreated);
   } else {
-    const deleted = readDeletedIds();
+    const deleted = readArray<string>(DELETED_KEY);
     if (!deleted.includes(id)) writeJSON(DELETED_KEY, [...deleted, id]);
   }
   cache = null;

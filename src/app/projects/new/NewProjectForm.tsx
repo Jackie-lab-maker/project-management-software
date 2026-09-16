@@ -203,7 +203,7 @@ export function NewProjectForm() {
                   <option value="">{tp.selectBuildingPlaceholder}</option>
                   {BUILDINGS.map((b) => (
                     <option key={b} value={b}>
-                      {t.enum.building[b] ?? b}
+                      {b === "Others" ? t.enum.building.Others : b}
                     </option>
                   ))}
                 </select>

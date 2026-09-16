@@ -16,13 +16,10 @@
 :root {
   --bg: #ffffff;
   --bg-sunken: #fafafa;
-  --bg-warm: #f0eeeb;
   --surface: #ffffff;
   --surface-hover: #fafafa;
 
   --line: #e5e5e5;
-  --line-strong: #0f0f0f;
-  --line-faint: rgba(15, 15, 15, 0.06);
 
   --ink: #0f0f0f;
   --text: #222939;
@@ -56,13 +53,10 @@
   :root:not([data-theme="light"]) {
     --bg: #0f0f0f;
     --bg-sunken: #151515;
-    --bg-warm: #17150f;
     --surface: #131313;
     --surface-hover: #1a1a1a;
 
     --line: #2a2a2a;
-    --line-strong: #f5f5f5;
-    --line-faint: rgba(255, 255, 255, 0.06);
 
     --ink: #fafafa;
     --text: #e8e9ed;
@@ -89,13 +83,10 @@
 @theme inline {
   --color-bg: var(--bg);
   --color-sunken: var(--bg-sunken);
-  --color-warm: var(--bg-warm);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
 
   --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-line-faint: var(--line-faint);
 
   --color-ink: var(--ink);
   --color-text: var(--text);
@@ -120,7 +111,6 @@
   --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
 
-  --radius-sharp: 2px;
 }
 
 html {

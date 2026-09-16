@@ -24,431 +24,7 @@ export type Lang = "en" | "zh";
  * language — the spec calls for "a shared reporting date/time zone" (§4),
  * which a per-viewer locale would undermine for an audited operational tool.
  */
-export interface Translations {
-  common: {
-    cancel: string;
-    dataUnavailable: string;
-    showAssumptions: string;
-    required: string;
-    all: string;
-  };
-  theme: {
-    colourTheme: string;
-    light: string;
-    system: string;
-  };
-  language: {
-    label: string;
-    english: string;
-    chineseSimplified: string;
-  };
-  nav: {
-    primaryLandmark: string;
-    micronHome: string;
-    home: string;
-    portfolio: string;
-    knowledge: string;
-    analytics: string;
-    administration: string;
-    signedIn: string;
-    searchAria: string;
-    searchPlaceholder: string;
-    closeAgentPanel: string;
-    openMenu: string;
-    closeMenu: string;
-  };
-  footer: {
-    trademark: string;
-  };
-  home: {
-    pageLabel: string;
-    greeting: (firstName: string) => string;
-    description: string;
-    newProject: string;
-    viewPortfolio: string;
-    statLeadLabel: string;
-    statLeadNote: string;
-    statAttentionLabel: string;
-    statAttentionNote: string;
-    statOverdueLabel: string;
-    statOverdueNote: string;
-    statKnowledgeLabel: string;
-    statKnowledgeNote: string;
-    attentionRequired: string;
-    projectsOffPlan: string;
-    allProjects: string;
-    progress: string;
-    criticalRisks: string;
-    overdue: string;
-    target: string;
-    agentInsights: string;
-    overnightFindings: string;
-    insight1: string;
-    insight2: string;
-    insight3: string;
-    knowledgeLabel: string;
-    recentlyUpdated: string;
-    hub: string;
-    yourQueue: string;
-    overdueActions: string;
-    updated: (timestamp: string) => string;
-    tableIssue: string;
-    tableProject: string;
-    tableSeverity: string;
-    tableOwner: string;
-    tableAge: string;
-  };
-  portfolio: {
-    pageLabel: string;
-    title: string;
-    description: string;
-    newProject: string;
-    search: string;
-    searchPlaceholder: string;
-    buildingLabel: string;
-    typeLabel: string;
-    stageLabel: string;
-    countOf: (filtered: number, total: number) => string;
-    viewAria: string;
-    viewTable: string;
-    viewCards: string;
-    viewTimeline: string;
-    stageDistribution: string;
-    dataUnavailableFiltered: string;
-    noMatches: string;
-    noMatchesDescription: string;
-    colProject: string;
-    colBuildingArea: string;
-    colType: string;
-    colStage: string;
-    colHealth: string;
-    colLead: string;
-    colProgress: string;
-    colTarget: string;
-    colBudget: string;
-    plannedTitle: (pct: number) => string;
-    planInline: (pct: number) => string;
-    cardStage: string;
-    cardSchedule: string;
-    cardLead: string;
-    cardTarget: string;
-  };
-  newProject: {
-    pageLabel: string;
-    title: string;
-    description: string;
-    sectionLocation: string;
-    sectionProject: string;
-    sectionOptional: string;
-    legendLocation: string;
-    legendProject: string;
-    legendOptional: string;
-    fieldBuilding: string;
-    fieldOtherBuildingName: string;
-    fieldArea: string;
-    fieldProjectName: string;
-    fieldProjectType: string;
-    fieldProjectLead: string;
-    fieldStartDate: string;
-    fieldTargetFinishDate: string;
-    fieldBudget: string;
-    fieldVendorName: string;
-    selectBuildingPlaceholder: string;
-    otherBuildingPlaceholder: string;
-    areaPlaceholder: string;
-    projectNamePlaceholder: string;
-    selectLeadPlaceholder: string;
-    vendorNamePlaceholder: string;
-    typeHint: string;
-    leadHint: string;
-    budgetHint: string;
-    vendorHint: string;
-    idPreviewLabel: string;
-    idPreviewHint: string;
-    projectNameHint: string;
-    namePreviewLabel: string;
-    namePreviewHint: string;
-    namePreviewEmpty: string;
-    duplicateBadge: string;
-    duplicateDescription: string;
-    duplicateAcknowledge: string;
-    fieldsNeedAttention: (count: number) => string;
-    createProject: string;
-    cancel: string;
-    auditFootnote: string;
-    createdBadge: string;
-    createdDescription: (name: string, location: string, area: string) => string;
-    goToPortfolio: string;
-    createAnother: string;
-    errors: {
-      buildingRequired: string;
-      otherBuildingRequired: string;
-      areaRequired: string;
-      nameRequired: string;
-      leadRequired: string;
-      leadInvalidRole: string;
-      startDateRequired: string;
-      targetDateRequired: string;
-      targetBeforeStart: string;
-    };
-  };
-  project: {
-    sectionLabel: string;
-    metaBuildingArea: string;
-    metaStage: string;
-    metaLead: string;
-    metaStart: string;
-    metaTargetFinish: string;
-    metaDataAsOf: string;
-    deleteProject: string;
-    deleteDialogLabel: string;
-    deleteDialogTitle: (id: string) => string;
-    deleteDialogDescription: (name: string) => string;
-    deletedLabel: string;
-    deletedDescription: string;
-    notFoundLabel: string;
-    notFoundDescription: (id: string) => string;
-    goToPortfolio: string;
-    tabs: {
-      overview: string;
-      timeline: string;
-      risksIssues: string;
-      vendor: string;
-      benefits: string;
-      experience: string;
-      file: string;
-    };
-    tabsAria: string;
-    kpi: {
-      statusLabel: string;
-      statusDefinition: (drivers: string) => string;
-      driverOnHold: string;
-      driverCancelled: string;
-      driverScheduleVariance: (pct: number) => string;
-      driverCriticalRisks: (count: number) => string;
-      driverOverdueIssues: (count: number) => string;
-      driverBudgetOverrun: (amount: string) => string;
-      driverNone: string;
-      progressLabel: string;
-      progressDefinition: string;
-      plannedPct: (pct: number) => string;
-      variancePct: (pct: number) => string;
-      budgetLabel: string;
-      budgetDefinition: (approved: string, forecast: string) => string;
-      variance: string;
-      spentOf: (approved: string, currency: string) => string;
-      roiLabel: string;
-      roiDefinition: (assumptions: string) => string;
-      payback: string;
-      months: (n: number) => string;
-      expected: string;
-      openIssuesLabel: string;
-      openIssuesDefinition: string;
-      noOpenIssues: string;
-      risksLabel: string;
-      risksDefinition: string;
-      topRisk: (title: string, exposure: number) => string;
-      noOpenRisks: string;
-      vendorStatusLabel: string;
-      vendorStatusDefinition: string;
-      openActions: string;
-      noVendor: string;
-      aiUsageLabel: string;
-      aiUsageDefinition: string;
-      actionsConfirmed: string;
-      promptsSummary: (users: number, hours: number) => string;
-    };
-    charts: {
-      progressTitle: string;
-      progressDefinition: string;
-      budgetTitle: string;
-      budgetDefinition: string;
-    };
-    lists: {
-      topRisksByExposure: string;
-      noRisksOnProject: string;
-      riskMeta: (id: string, exposure: number, owner: string) => string;
-      openIssuesTitle: string;
-      noIssuesOnProject: string;
-      issueMeta: (id: string, owner: string, ageDays: number) => string;
-      overdue: string;
-    };
-    timeline: {
-      weight: (n: number) => string;
-      planned: (date: string) => string;
-      actual: (date: string) => string;
-      notComplete: string;
-    };
-    risksIssues: {
-      riskRegister: string;
-      colId: string;
-      colRisk: string;
-      colSeverity: string;
-      colProbabilityImpact: string;
-      colOwner: string;
-      colMitigation: string;
-      noRisks: string;
-      issueRegister: string;
-      colIssue: string;
-      colAge: string;
-      colState: string;
-      noIssues: string;
-      overdueBadge: string;
-      onTimeBadge: string;
-    };
-    vendor: {
-      noVendorLabel: string;
-      noVendorDescription: string;
-      vendorLabel: string;
-      vendorDefinition: string;
-      contractMilestonesLabel: string;
-      contractMilestonesDefinition: string;
-      openActionsLabel: string;
-      openActionsDefinition: string;
-      lastUpdateLabel: string;
-      lastUpdateDefinition: string;
-      scorecard: string;
-      scorecardDefinition: string;
-      delivery: string;
-      quality: string;
-      responsiveness: string;
-    };
-    benefits: {
-      hcSaving: string;
-      hcSavingDefinition: string;
-      energySaving: string;
-      energySavingDefinition: string;
-      planned: string;
-      validated: string;
-      realized: string;
-    };
-    experience: {
-      banner: string;
-      context: string;
-      contextValue: (name: string, area: string, stage: string, lead: string) => string;
-      goalOutcome: string;
-      whatWorked: string;
-      issueRootCause: string;
-      countermeasure: string;
-      reusableArtifacts: string;
-      notCaptured: string;
-    };
-    files: {
-      banner: string;
-      foldersLabel: string;
-      contentsLabel: string;
-      emptyTitle: string;
-      emptyDescription: string;
-      folders: Record<string, string>;
-    };
-  };
-  knowledge: {
-    pageLabel: string;
-    title: string;
-    description: string;
-    search: string;
-    searchPlaceholder: string;
-    searchHint: string;
-    category: string;
-    allCategories: string;
-    approvalState: string;
-    countOf: (filtered: number, total: number) => string;
-    approvedOnlyNote: string;
-    noMatches: string;
-    noMatchesDescription: string;
-    owner: (name: string) => string;
-    effective: (date: string) => string;
-    review: (date: string) => string;
-  };
-  analytics: {
-    pageLabel: string;
-    title: string;
-    description: string;
-    activeProjectsLabel: string;
-    activeProjectsNote: string;
-    behindPlanLabel: string;
-    behindPlanNote: string;
-    approvedCapitalLabel: string;
-    approvedCapitalNote: (forecast: string) => string;
-    realizedHcLabel: string;
-    realizedHcNote: string;
-    stageDistribution: string;
-    scheduleVarianceByProject: string;
-    knowledgeHealth: string;
-    approvalReviewCoverage: string;
-    approvedCoverage: string;
-    approvedCoverageNote: (approved: number, total: number) => string;
-    awaitingReview: string;
-    awaitingReviewNote: string;
-    reuseSignal: string;
-    reuseSignalHealthy: string;
-    reuseSignalNote: string;
-  };
-  admin: {
-    pageLabel: string;
-    title: string;
-    description: string;
-    accessModel: string;
-    rolesAndPermissions: string;
-    colRole: string;
-    colCorePermissions: string;
-    colUsers: string;
-    governance: string;
-    recentAuditEvents: string;
-    colActor: string;
-    colAction: string;
-    colTarget: string;
-    colOutcome: string;
-    colTimestamp: string;
-    auditRetention: string;
-    auditRetentionBody: string;
-    rolePermissions: Record<Role, string>;
-    auditActions: string[];
-  };
-  agent: {
-    name: string;
-    aiOperationsAgent: string;
-    panelAria: string;
-    sources: string;
-    actionConfirmed: string;
-    actionDiscarded: string;
-    proposedChange: string;
-    confirmAndApply: string;
-    discard: string;
-    you: string;
-    askAgent: string;
-    inputPlaceholder: string;
-    citeNote: string;
-    send: string;
-  };
-  chart: {
-    progressAria: string;
-    planned: string;
-    actual: string;
-    captionText: string;
-    colPeriod: string;
-    colPlannedPct: string;
-    colActualPct: string;
-    budgetActual: string;
-    budgetCommitted: string;
-    budgetApproved: string;
-    budgetForecast: string;
-  };
-  enum: {
-    health: Record<Health, string>;
-    severity: Record<Severity, string>;
-    stage: Record<Stage, string>;
-    projectType: Record<ProjectType, string>;
-    approvalState: Record<ApprovalState, string>;
-    knowledgeCategory: Record<KnowledgeCategory, string>;
-    role: Record<Role, string>;
-    mitigationStatus: Record<string, string>;
-    auditOutcome: Record<string, string>;
-    building: Record<string, string>;
-  };
-}
-
-export const en: Translations = {
+export const en = {
   common: {
     cancel: "Cancel",
     dataUnavailable: "Data unavailable",
@@ -487,7 +63,7 @@ export const en: Translations = {
   },
   home: {
     pageLabel: "Home",
-    greeting: (firstName) => `Good morning, ${firstName}.`,
+    greeting: (firstName: string) => `Good morning, ${firstName}.`,
     description: "Your assigned work, the projects that need attention today, and what the agent found overnight.",
     newProject: "New project",
     viewPortfolio: "View portfolio",
@@ -517,7 +93,7 @@ export const en: Translations = {
     hub: "Hub",
     yourQueue: "Your queue",
     overdueActions: "Overdue actions",
-    updated: (timestamp) => `Updated ${timestamp}`,
+    updated: (timestamp: string) => `Updated ${timestamp}`,
     tableIssue: "Issue",
     tableProject: "Project",
     tableSeverity: "Severity",
@@ -534,7 +110,7 @@ export const en: Translations = {
     buildingLabel: "Building",
     typeLabel: "Type",
     stageLabel: "Stage",
-    countOf: (filtered, total) => `${filtered} of ${total} projects`,
+    countOf: (filtered: number, total: number) => `${filtered} of ${total} projects`,
     viewAria: "View",
     viewTable: "table",
     viewCards: "cards",
@@ -552,8 +128,8 @@ export const en: Translations = {
     colProgress: "Progress",
     colTarget: "Target",
     colBudget: "Budget",
-    plannedTitle: (pct) => `Planned ${pct}%`,
-    planInline: (pct) => `plan ${pct}%`,
+    plannedTitle: (pct: number) => `Planned ${pct}%`,
+    planInline: (pct: number) => `plan ${pct}%`,
     cardStage: "Stage",
     cardSchedule: "Schedule",
     cardLead: "Lead",
@@ -601,12 +177,12 @@ export const en: Translations = {
     duplicateBadge: "Possible duplicate",
     duplicateDescription: "An active project already exists with the same building, area and name.",
     duplicateAcknowledge: "Create it anyway — I have confirmed this is a separate project.",
-    fieldsNeedAttention: (count) => `${count} field(s) need attention`,
+    fieldsNeedAttention: (count: number) => `${count} field(s) need attention`,
     createProject: "Create project",
     cancel: "Cancel",
     auditFootnote: "Creation is recorded in the audit log with actor, timestamp and the full field set.",
     createdBadge: "Project created",
-    createdDescription: (name, location, area) =>
+    createdDescription: (name: string, location: string, area: string) =>
       `${name} has been created in ${location} · ${area}. The ID is immutable and the creation event is recorded in the audit log.`,
     goToPortfolio: "Go to portfolio",
     createAnother: "Create another",
@@ -632,13 +208,13 @@ export const en: Translations = {
     metaDataAsOf: "Data as of",
     deleteProject: "Delete project",
     deleteDialogLabel: "Delete project",
-    deleteDialogTitle: (id) => `Delete ${id}?`,
-    deleteDialogDescription: (name) =>
+    deleteDialogTitle: (id: string) => `Delete ${id}?`,
+    deleteDialogDescription: (name: string) =>
       `This removes "${name}" and its risks, issues, milestones and benefit data from your view in this browser. This cannot be undone.`,
     deletedLabel: "Project deleted",
     deletedDescription: "Returning to the portfolio…",
     notFoundLabel: "Not found",
-    notFoundDescription: (id) => `No project matches ${id}. It may not exist, or you may not have permission to view it.`,
+    notFoundDescription: (id: string) => `No project matches ${id}. It may not exist, or you may not have permission to view it.`,
     goToPortfolio: "Go to portfolio",
     tabs: {
       overview: "Overview",
@@ -652,36 +228,36 @@ export const en: Translations = {
     tabsAria: "Project sections",
     kpi: {
       statusLabel: "Project status",
-      statusDefinition: (drivers) => `Health is derived from schedule, risk, issue and budget rules. Drivers: ${drivers}`,
+      statusDefinition: (drivers: string) => `Health is derived from schedule, risk, issue and budget rules. Drivers: ${drivers}`,
       driverOnHold: "Project stage is On Hold.",
       driverCancelled: "Project is cancelled.",
-      driverScheduleVariance: (pct) => `Schedule variance ${pct}%.`,
-      driverCriticalRisks: (count) => `${count} critical risk${count > 1 ? "s" : ""} open.`,
-      driverOverdueIssues: (count) => `${count} overdue issue${count > 1 ? "s" : ""}.`,
-      driverBudgetOverrun: (amount) => `Forecast exceeds approved budget by ${amount}.`,
+      driverScheduleVariance: (pct: number) => `Schedule variance ${pct}%.`,
+      driverCriticalRisks: (count: number) => `${count} critical risk${count > 1 ? "s" : ""} open.`,
+      driverOverdueIssues: (count: number) => `${count} overdue issue${count > 1 ? "s" : ""}.`,
+      driverBudgetOverrun: (amount: string) => `Forecast exceeds approved budget by ${amount}.`,
       driverNone: "No schedule, risk, issue or budget rule triggered.",
       progressLabel: "Project progress",
       progressDefinition:
         "Percent complete from weighted milestones. Planned progress is interpolated from the milestone baseline. A manual override is audited and shown alongside, never instead of, the weighted roll-up.",
-      plannedPct: (pct) => `Planned ${pct}%`,
-      variancePct: (pct) => `${pct > 0 ? "+" : ""}${pct}% variance`,
+      plannedPct: (pct: number) => `Planned ${pct}%`,
+      variancePct: (pct: number) => `${pct > 0 ? "+" : ""}${pct}% variance`,
       budgetLabel: "Budget",
-      budgetDefinition: (approved, forecast) =>
+      budgetDefinition: (approved: string, forecast: string) =>
         `Approved ${approved}; forecast at completion ${forecast}. Variance is approved minus forecast.`,
       variance: "Variance",
-      spentOf: (approved, currency) => `spent of ${approved} ${currency}`,
+      spentOf: (approved: string, currency: string) => `spent of ${approved} ${currency}`,
       roiLabel: "ROI",
-      roiDefinition: (assumptions) =>
+      roiDefinition: (assumptions: string) =>
         `(annualized quantified benefit − annual operating cost) / total project cost × 100. Assumptions: ${assumptions}`,
       payback: "Payback",
-      months: (n) => `${n} months`,
+      months: (n: number) => `${n} months`,
       expected: "Expected",
       openIssuesLabel: "Open issues",
       openIssuesDefinition: "Count by severity with age. Overdue means the owner action date has passed.",
       noOpenIssues: "No open issues",
       risksLabel: "Risks",
       risksDefinition: "Exposure is probability × impact on a 1–5 scale. Top risks are ranked by exposure.",
-      topRisk: (title, exposure) => `Top: ${title} (exposure ${exposure})`,
+      topRisk: (title: string, exposure: number) => `Top: ${title} (exposure ${exposure})`,
       noOpenRisks: "No open risks",
       vendorStatusLabel: "Vendor status",
       vendorStatusDefinition: "Vendor health combines contractual milestone completion with delivery, quality and responsiveness scores.",
@@ -690,7 +266,7 @@ export const en: Translations = {
       aiUsageLabel: "AI usage",
       aiUsageDefinition: "Agent activity scoped to this project. Prompt text is never exposed to users without permission.",
       actionsConfirmed: "Actions confirmed",
-      promptsSummary: (users, hours) => `prompts · ${users} users · ~${hours}h saved`,
+      promptsSummary: (users: number, hours: number) => `prompts · ${users} users · ~${hours}h saved`,
     },
     charts: {
       progressTitle: "Progress · planned vs actual",
@@ -702,16 +278,16 @@ export const en: Translations = {
     lists: {
       topRisksByExposure: "Top risks by exposure",
       noRisksOnProject: "No open risks on this project.",
-      riskMeta: (id, exposure, owner) => `${id} · exposure ${exposure} · ${owner}`,
+      riskMeta: (id: string, exposure: number, owner: string) => `${id} · exposure ${exposure} · ${owner}`,
       openIssuesTitle: "Open issues",
       noIssuesOnProject: "No open issues on this project.",
-      issueMeta: (id, owner, ageDays) => `${id} · ${owner} · ${ageDays}d old`,
+      issueMeta: (id: string, owner: string, ageDays: number) => `${id} · ${owner} · ${ageDays}d old`,
       overdue: "Overdue",
     },
     timeline: {
-      weight: (n) => `weight ${n}`,
-      planned: (date) => `Planned ${date}`,
-      actual: (date) => `Actual ${date}`,
+      weight: (n: number) => `weight ${n}`,
+      planned: (date: string) => `Planned ${date}`,
+      actual: (date: string) => `Actual ${date}`,
       notComplete: "Not complete",
     },
     risksIssues: {
@@ -763,7 +339,7 @@ export const en: Translations = {
       banner:
         "The agent can draft this report from the project record, milestones and meeting log. It will never submit on your behalf — you review and confirm every field before it is saved.",
       context: "Context",
-      contextValue: (name, area, stage, lead) => `${name} · ${area} · stage ${stage} · lead ${lead}`,
+      contextValue: (name: string, area: string, stage: string, lead: string) => `${name} · ${area} · stage ${stage} · lead ${lead}`,
       goalOutcome: "Goal and delivered outcome",
       whatWorked: "What worked well",
       issueRootCause: "Issue / failure and root cause",
@@ -828,13 +404,13 @@ export const en: Translations = {
     category: "Category",
     allCategories: "All categories",
     approvalState: "Approval state",
-    countOf: (filtered, total) => `${filtered} of ${total} items`,
+    countOf: (filtered: number, total: number) => `${filtered} of ${total} items`,
     approvedOnlyNote: "Approved revisions only in agent context",
     noMatches: "No matches",
     noMatchesDescription: "Nothing matches these facets. Clear a filter or widen the search.",
-    owner: (name) => `Owner ${name}`,
-    effective: (date) => `Effective ${date}`,
-    review: (date) => `Review ${date}`,
+    owner: (name: string) => `Owner ${name}`,
+    effective: (date: string) => `Effective ${date}`,
+    review: (date: string) => `Review ${date}`,
   },
   analytics: {
     pageLabel: "Analytics",
@@ -846,7 +422,7 @@ export const en: Translations = {
     behindPlanLabel: "Behind plan",
     behindPlanNote: "Negative schedule variance against the milestone baseline.",
     approvedCapitalLabel: "Approved capital",
-    approvedCapitalNote: (forecast) => `Forecast at completion ${forecast}.`,
+    approvedCapitalNote: (forecast: string) => `Forecast at completion ${forecast}.`,
     realizedHcLabel: "Realized HC saving",
     realizedHcNote: "Sum of validated post-implementation measurements only.",
     stageDistribution: "Stage distribution",
@@ -854,7 +430,7 @@ export const en: Translations = {
     knowledgeHealth: "Knowledge health",
     approvalReviewCoverage: "Approval and review coverage",
     approvedCoverage: "Approved coverage",
-    approvedCoverageNote: (approved, total) => `${approved} of ${total} items are in the Approved state and eligible as agent context.`,
+    approvedCoverageNote: (approved: number, total: number) => `${approved} of ${total} items are in the Approved state and eligible as agent context.`,
     awaitingReview: "Awaiting review",
     awaitingReviewNote: "Items in review are excluded from retrieval until approved.",
     reuseSignal: "Reuse signal",
@@ -990,6 +566,14 @@ export const en: Translations = {
     },
   },
 };
+
+/**
+ * Derived from the English dictionary rather than hand-maintained beside it:
+ * en is the source of truth for the shape, zh is checked against it, and a
+ * key can't be added to one without the other. Also gives folders its real
+ * key union instead of Record<string, string>.
+ */
+export type Translations = typeof en;
 
 export const zh: Translations = {
   common: {

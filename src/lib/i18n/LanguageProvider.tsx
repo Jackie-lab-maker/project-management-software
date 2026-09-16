@@ -60,8 +60,3 @@ export function useLanguage(): LanguageContextValue {
   if (!ctx) throw new Error("useLanguage must be used within a LanguageProvider");
   return ctx;
 }
-
-/** Shorthand for the common case of only needing the dictionary. */
-export function useT(): Translations {
-  return useLanguage().t;
-}

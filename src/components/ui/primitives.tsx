@@ -155,7 +155,7 @@ export function Panel({
    Status — always text + shape, never colour alone (spec §4).
    ---------------------------------------------------------------- */
 
-export type StatusTone = "ok" | "warn" | "risk" | "none";
+type StatusTone = "ok" | "warn" | "risk" | "none";
 
 const statusGlyph: Record<StatusTone, string> = {
   ok: "●",

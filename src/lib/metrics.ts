@@ -1,7 +1,7 @@
 import type { Translations } from "./i18n/translations";
 import type { Health, Measure, Project, Risk, Severity } from "./types";
 
-export const SEVERITY_ORDER: Severity[] = ["Critical", "High", "Medium", "Low"];
+const SEVERITY_ORDER: Severity[] = ["Critical", "High", "Medium", "Low"];
 
 /**
  * Percent complete from milestone weights. The spec forbids manual percent
@@ -38,10 +38,6 @@ export function riskExposure(risk: Risk): number {
   return risk.probability * risk.impact;
 }
 
-export function topRisks(project: Project, count = 3): Risk[] {
-  return [...project.risks].sort((a, b) => riskExposure(b) - riskExposure(a)).slice(0, count);
-}
-
 export function issueCounts(project: Project) {
   const bySeverity = SEVERITY_ORDER.map((severity) => ({
     severity,
@@ -59,7 +55,7 @@ export function issueCounts(project: Project) {
  * UI layer can render them in the active language. Each variant carries only
  * the raw values it needs to format.
  */
-export type HealthDriver =
+type HealthDriver =
   | { type: "onHold" }
   | { type: "cancelled" }
   | { type: "scheduleVariance"; pct: number }
@@ -128,10 +124,6 @@ export function formatNumber(value: number, options: Intl.NumberFormatOptions = 
 }
 
 /** Renders a Measure, honouring the rule that absent inputs never read as zero. */
-export function renderMeasure<T>(measure: Measure<T>, format: (value: T) => string): string {
-  return measure.status === "available" ? format(measure.value) : "Data unavailable";
-}
-
 export function daysUntil(dateIso: string, from = new Date()): number {
   const target = new Date(dateIso);
   return Math.round((target.getTime() - from.getTime()) / 86_400_000);

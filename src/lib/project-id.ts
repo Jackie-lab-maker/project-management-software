@@ -5,8 +5,6 @@ const PREFIX: Record<ProjectType, string> = {
   CIP: "CIP",
 };
 
-export const prefixFor = (type: ProjectType) => PREFIX[type];
-
 /**
  * Formats a project ID as {prefix}{YYYY}{MM}{sequence}.
  *
@@ -62,7 +60,7 @@ export interface ProjectDraft {
  * it returns what went wrong and the form renders that into the active
  * language via translations.ts's newProject.errors.
  */
-export type FieldErrorCode =
+type FieldErrorCode =
   | "buildingRequired"
   | "otherBuildingRequired"
   | "areaRequired"

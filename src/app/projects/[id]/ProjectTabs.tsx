@@ -702,7 +702,7 @@ function Files({ t }: { t: Translations }) {
                     <span aria-hidden className="mono-label shrink-0 text-faint">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="leading-snug">{tf.folders[folder.key] ?? folder.key}</span>
+                    <span className="leading-snug">{tf.folders[folder.key]}</span>
                     <span className="tnum ml-auto shrink-0 text-[12px] text-faint">
                       {folder.children?.length}
                     </span>
@@ -716,7 +716,7 @@ function Files({ t }: { t: Translations }) {
         <div>
           <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4 lg:px-8">
             <MonoLabel>{tf.contentsLabel}</MonoLabel>
-            <span className="text-[14px] text-ink">{tf.folders[selected.key] ?? selected.key}</span>
+            <span className="text-[14px] text-ink">{tf.folders[selected.key]}</span>
           </header>
 
           {selected.children ? (
@@ -729,7 +729,7 @@ function Files({ t }: { t: Translations }) {
                   <span aria-hidden className="text-faint">
                     ▸
                   </span>
-                  {tf.folders[child.key] ?? child.key}
+                  {tf.folders[child.key]}
                 </li>
               ))}
             </ul>

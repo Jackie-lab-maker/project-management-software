@@ -4,8 +4,13 @@
  * segment. Keys are unique among siblings, not globally — "meetingMinutes"
  * recurs under several phases, and a path is the chain of keys.
  */
+import type { Translations } from "./i18n/translations";
+
+/** Every folder must have a label, and every label must belong to a folder. */
+type FolderKey = keyof Translations["project"]["files"]["folders"];
+
 export interface ProjectFolder {
-  key: string;
+  key: FolderKey;
   children?: ProjectFolder[];
 }
 
