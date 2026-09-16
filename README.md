@@ -24,7 +24,7 @@ The agent ships as a persistent right-side panel on every screen: cited sources 
 
 ## Project file taxonomy
 
-Every project carries the same two-layer folder tree, keyed to the project lifecycle: project initial, project designing, project implement & release production, project close, project CIP & improvement, after sales services, commercial documents, project status update. Second-layer subfolders hang off each phase — requirement, FAC, UAT & SAC, handover document, NDA, and so on.
+Every project carries the same two-layer folder tree, keyed to the project lifecycle: Project Initial, Project Designing, Project Implement & Release Production, Project Close, Project CIP & Improvement, After Sales Services, Commercial Documents, Project Status Update. Second-layer subfolders hang off each phase — Requirement, FAC, UAT & SAC, Handover Document, NDA, and so on. Folder names are Title Case throughout.
 
 The tree is data rather than markup, so deepening it is a change to one file: [`src/lib/project-files.ts`](src/lib/project-files.ts). Folders are keyed, not named, there — the label comes from the translation dictionaries so the tree reads in the viewer's language while the key stays stable as a storage path segment. Keys are unique among siblings rather than globally, so recurring folders (`meetingMinutes`, `others`) share one label and still resolve to distinct paths.
 
