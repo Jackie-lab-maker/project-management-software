@@ -375,7 +375,7 @@ export const en = {
         schedule: "Schedule",
         fac: "FAC",
         dispatchReceiving: "Dispatch & Receiving",
-        setupInstallation: "Set Up & Installation",
+        setupInstallation: "Setup & Installation",
         commissioning: "Commissioning",
         uatSac: "UAT & SAC",
         ccb: "CCB",
