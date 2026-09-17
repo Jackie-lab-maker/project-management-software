@@ -20,27 +20,42 @@ export const PROJECT_FOLDERS: ProjectFolder[] = [
     children: [
       { key: "background" },
       { key: "benefitRoi" },
-      { key: "reviewApproval" },
-      { key: "vendorEvaluation" },
+      { key: "reviewApproval", children: [{ key: "fundingSlides" }, { key: "reviewSlides" }] },
+      {
+        key: "vendorEvaluation",
+        children: [
+          { key: "vendorProposal" },
+          { key: "vendorQuotation" },
+          { key: "biddingDocument" },
+          { key: "ktda" },
+        ],
+      },
       { key: "meetingMinutes" },
       { key: "others" },
     ],
   },
   {
     key: "designing",
-    children: [{ key: "requirement" }, { key: "design" }, { key: "meetingMinutes" }],
+    children: [
+      { key: "requirement", children: [{ key: "softwareHardwareRequirement" }, { key: "sowDoc2" }] },
+      { key: "design", children: [{ key: "hardwareDesign" }, { key: "softwareDesign" }, { key: "otherDocuments" }] },
+      { key: "meetingMinutes" },
+    ],
   },
   {
     key: "implementation",
     children: [
-      { key: "schedule" },
-      { key: "fac" },
-      { key: "dispatchReceiving" },
-      { key: "setupInstallation" },
-      { key: "commissioning" },
-      { key: "uatSac" },
-      { key: "ccb" },
-      { key: "tryRunRelease" },
+      { key: "schedule", children: [{ key: "vendorSchedule" }, { key: "internalSchedule" }] },
+      { key: "fac", children: [{ key: "facDocuments" }] },
+      { key: "dispatchReceiving", children: [{ key: "batch1" }, { key: "batch2" }, { key: "batch3" }] },
+      {
+        key: "setupInstallation",
+        children: [{ key: "facilityItRequirement" }, { key: "installationDocument" }],
+      },
+      { key: "commissioning", children: [{ key: "issueSolution" }] },
+      { key: "uatSac", children: [{ key: "sac" }, { key: "uat" }, { key: "ehsQaOtherAcceptance" }] },
+      { key: "ccb", children: [{ key: "gcpChange" }, { key: "others" }] },
+      { key: "tryRunRelease", children: [{ key: "pilotRun" }, { key: "performanceTrack" }] },
       { key: "ra" },
       { key: "meetingMinutes" },
       { key: "others" },
@@ -49,9 +64,17 @@ export const PROJECT_FOLDERS: ProjectFolder[] = [
   {
     key: "close",
     children: [
-      { key: "handover" },
+      {
+        key: "handover",
+        children: [
+          { key: "vendorOperationManual" },
+          { key: "buyoffDocumentWithVendor" },
+          { key: "benefitBuyoff" },
+          { key: "sparePartsList" },
+        ],
+      },
       { key: "photoVideo" },
-      { key: "closeMeeting" },
+      { key: "closeMeeting", children: [{ key: "documentArchive" }] },
       { key: "meetingMinutes" },
     ],
   },

@@ -26,7 +26,7 @@ import {
   scheduleVariance,
   weightedProgress,
 } from "@/lib/metrics";
-import { PROJECT_FOLDERS } from "@/lib/project-files";
+import { PROJECT_FOLDERS, type ProjectFolder } from "@/lib/project-files";
 import type { Measure, Project } from "@/lib/types";
 
 const TABS = ["overview", "timeline", "risksIssues", "vendor", "benefits", "experience", "file"] as const;
@@ -664,6 +664,36 @@ function Experience({ project, t }: { project: Project; t: Translations }) {
 
 /* ------------------------------------------------------------------- Files */
 
+/** Renders a folder's children, nesting recursively for a third layer. */
+function FolderList({
+  folders,
+  folderLabels,
+  depth = 0,
+}: {
+  folders: ProjectFolder[];
+  folderLabels: Translations["project"]["files"]["folders"];
+  depth?: number;
+}) {
+  return (
+    <ul>
+      {folders.map((folder) => (
+        <li key={folder.key} className="border-b border-line last:border-b-0">
+          <div
+            className="flex items-center gap-3 py-3 pr-6 text-[13px] text-ink lg:pr-8"
+            style={{ paddingLeft: `${24 + depth * 20}px` }}
+          >
+            <span aria-hidden className="text-faint">
+              ▸
+            </span>
+            {folderLabels[folder.key]}
+          </div>
+          {folder.children && <FolderList folders={folder.children} folderLabels={folderLabels} depth={depth + 1} />}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Files({ t }: { t: Translations }) {
   const tf = t.project.files;
   const [selected, setSelected] = useState(PROJECT_FOLDERS[0]);
@@ -720,19 +750,7 @@ function Files({ t }: { t: Translations }) {
           </header>
 
           {selected.children ? (
-            <ul>
-              {selected.children.map((child) => (
-                <li
-                  key={child.key}
-                  className="flex items-center gap-3 border-b border-line px-6 py-3 text-[13px] text-ink lg:px-8"
-                >
-                  <span aria-hidden className="text-faint">
-                    ▸
-                  </span>
-                  {tf.folders[child.key]}
-                </li>
-              ))}
-            </ul>
+            <FolderList folders={selected.children} folderLabels={tf.folders} />
           ) : (
             <div className="px-6 py-16 text-center lg:px-8">
               <MonoLabel className="mb-3">{tf.emptyTitle}</MonoLabel>
